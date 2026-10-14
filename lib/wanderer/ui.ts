@@ -1,9 +1,12 @@
-export function changeLanguage(lang) {
+import type WandererEngine from '../WandererEngine';
+import type { Language } from './types';
+
+export function changeLanguage(this: WandererEngine, lang: Language): void {
   document.documentElement.lang = lang;
   this.setState({ lang });
 }
 
-export function createViewModel() {
+export function createViewModel(this: WandererEngine) {
   const ja = this.state.lang === 'ja', d = this.state.dir;
   const on = 'color-mix(in srgb, var(--color-accent) 25%, transparent)';
   const c = this.cards[this.state.card], cc = c ? (ja ? c.ja : c.en) : ['', '', '', ''];

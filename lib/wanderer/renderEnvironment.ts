@@ -1,8 +1,11 @@
-export function renderCity(ctx, cam, SY, w, col) {
+import type WandererEngine from '../WandererEngine';
+import type { NumericPalette, RenderPalette, RGB, ScreenY } from './types';
+
+export function renderCity(this: WandererEngine, ctx: CanvasRenderingContext2D, cam: number, SY: ScreenY, w: number, col: RenderPalette): void {
   const X = this.x, rv = this.introDone ? 1 : Math.min(1, (this.intro.reveal || 0) / 700);
   if (rv <= 0 || cam > 3900) return;
   const cityA = 1 - this.ss(3300, 3900, X), gyB = SY(this.g(X)) + 2;
-  const dl = (x1, y1, x2, y2, step, r, seed, cols) => { const d = Math.hypot(x2 - x1, y2 - y1), n = Math.max(1, Math.floor(d / step)); for (let i = 0; i <= n; i++) { const t = i / n, q = this.rand(seed + i * 1.7); if (cols) ctx.fillStyle = cols[Math.floor(q * cols.length)]; ctx.beginPath(); ctx.arc(x1 + (x2 - x1) * t, y1 + (y2 - y1) * t, r * (0.75 + q * 0.5), 0, 7); ctx.fill(); } };
+  const dl = (x1: number, y1: number, x2: number, y2: number, step: number, r: number, seed: number, cols?: string[]) => { const d = Math.hypot(x2 - x1, y2 - y1), n = Math.max(1, Math.floor(d / step)); for (let i = 0; i <= n; i++) { const t = i / n, q = this.rand(seed + i * 1.7); if (cols) ctx.fillStyle = cols[Math.floor(q * cols.length)]; ctx.beginPath(); ctx.arc(x1 + (x2 - x1) * t, y1 + (y2 - y1) * t, r * (0.75 + q * 0.5), 0, 7); ctx.fill(); } };
   if (cityA > 0) { ctx.fillStyle = col.dot;
     for (const b of this.back) {
       const sx = b.x - cam * 0.55; if (sx > w + 10 || sx + b.w < -10) continue;
@@ -38,18 +41,20 @@ export function renderCity(ctx, cam, SY, w, col) {
   ctx.globalAlpha = 1;
 }
 
-export function renderRoad() {}
+export function renderRoad(this: WandererEngine): void {}
 
-export function renderDotLine(ctx, x1, y1, x2, y2, step, r) { const d = Math.hypot(x2 - x1, y2 - y1), n = Math.max(1, Math.floor(d / step)); for (let i = 0; i <= n; i++) { const t = i / n; ctx.fillRect(x1 + (x2 - x1) * t - r / 2, y1 + (y2 - y1) * t - r / 2, r, r); } }
+export function renderDotLine(this: WandererEngine, ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, step: number, r: number): void { const d = Math.hypot(x2 - x1, y2 - y1), n = Math.max(1, Math.floor(d / step)); for (let i = 0; i <= n; i++) { const t = i / n; ctx.fillRect(x1 + (x2 - x1) * t - r / 2, y1 + (y2 - y1) * t - r / 2, r, r); } }
 
-export function renderScene() {
+export function renderScene(this: WandererEngine): void {
   const cv = this.canvasRef.current; if (!cv) return;
   const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
   const pixelWidth = Math.round(w * dpr), pixelHeight = Math.round(h * dpr);
   if (cv.width !== pixelWidth || cv.height !== pixelHeight) { cv.width = pixelWidth; cv.height = pixelHeight; }
-  const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+  const ctx = cv.getContext('2d'); if (!ctx) return; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
   const D = this.dark(this.x), L = this.L, K = this.D, N = this.nightV || 0, NK = this.NK;
-  const lp = (p, q, t) => p.map((v, i) => v + (q[i] - v) * t), m = k => lp(lp(L[k], K[k], D), NK[k], N), str = c => `rgb(${c.map(Math.round).join(',')})`;
+  const lp = (p: RGB, q: RGB, t: number): RGB => p.map((v, i) => v + (q[i] - v) * t) as RGB;
+  const m = (key: keyof NumericPalette): RGB => lp(lp(L[key], K[key], D), NK[key], N);
+  const str = (color: RGB): string => `rgb(${color.map(Math.round).join(',')})`;
   const col = { bg: str(m('bg')), ink: str(m('ink')), dot: str(m('dot')), mut: str(m('mut')) };
   const root = this.rootRef.current, key = D + N * 7;
   if (root && Math.abs((this._lastD ?? -1) - key) > 0.004) {
@@ -61,7 +66,7 @@ export function renderScene() {
   if (this.camX == null) this.camX = this.x;
   this.camX += (this.x - this.camX) * 0.12;
   const cam = this.camX - w * 0.45, baseY = h * 0.72, camY = this.camY;
-  const SY = wy => baseY + wy - camY;
+  const SY = (wy: number) => baseY + wy - camY;
   const X = this.x;
   this.drawIntro(ctx, cam, SY, w, col);
   // meadow clouds
@@ -137,7 +142,8 @@ export function renderScene() {
       const sc = (1 - fm) * (p.trunk ? 4 : 18), ang = k * 40;
       const ox = Math.cos(ang) * sc, oy = Math.sin(ang) * sc * 0.6 + (1 - fm) * k * 8;
       ctx.globalAlpha = p.trunk ? 0.6 + p.c * 0.3 : 0.45 + p.c * 0.45;
-      ctx.fillStyle = p.trunk ? (p.c > .5 ? '#6b5544' : '#8a7462') : (p.shade + (p.c - .5) * .5 < 0.35 ? '#4f8a5b' : p.shade + (p.c - .5) * .5 < 0.7 ? '#3d6e48' : '#2c5236');
+      const shade = p.shade ?? 0.5;
+      ctx.fillStyle = p.trunk ? (p.c > .5 ? '#6b5544' : '#8a7462') : (shade + (p.c - .5) * .5 < 0.35 ? '#4f8a5b' : shade + (p.c - .5) * .5 < 0.7 ? '#3d6e48' : '#2c5236');
       ctx.globalAlpha *= vis * (1 - 0.35 * N); ctx.beginPath(); ctx.arc(sx + p.x + sway + ox, gy + p.y + oy, p.r * (0.6 + 0.4 * vis), 0, 7); ctx.fill();
     }
     ctx.restore();
@@ -242,7 +248,7 @@ export function renderScene() {
     }
   }
   ctx.globalAlpha = 1;
-  this.drawRoad(ctx, cam, SY, w);
+  this.drawRoad();
   // ground
   const start = Math.floor(cam / 9) - 1, end = Math.ceil((cam + w) / 9) + 1;
   for (let i = start; i <= end; i++) {
@@ -265,9 +271,9 @@ export function renderScene() {
     const fade = Math.min(1, p.life / Math.max(.01, (p.max || 1) * .4)), sx = p.x - cam, sy = SY(p.y);
     if (sx < -20 || sx > w + 20) continue;
     ctx.globalAlpha = fade * .85;
-    if (p.k === 'drop') { ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(sx, sy, p.r, 0, 7); ctx.fill(); }
-    else if (p.k === 'rect') { ctx.fillStyle = col.ink; ctx.save(); ctx.translate(sx, sy); ctx.rotate(p.rot); ctx.fillRect(-p.w / 2, -1.6, p.w, 3.2); ctx.restore(); }
-    else if (p.k === 'petal') { ctx.fillStyle = p.c; ctx.save(); ctx.translate(sx, sy); ctx.rotate(p.rot + this.t); ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 4, 0, Math.PI * .6); ctx.closePath(); ctx.fill(); ctx.restore(); }
+    if (p.k === 'drop') { ctx.fillStyle = p.c ?? col.dot; ctx.beginPath(); ctx.arc(sx, sy, p.r ?? 1, 0, 7); ctx.fill(); }
+    else if (p.k === 'rect') { const width = p.w ?? 0; ctx.fillStyle = col.ink; ctx.save(); ctx.translate(sx, sy); ctx.rotate(p.rot ?? 0); ctx.fillRect(-width / 2, -1.6, width, 3.2); ctx.restore(); }
+    else if (p.k === 'petal') { ctx.fillStyle = p.c ?? col.dot; ctx.save(); ctx.translate(sx, sy); ctx.rotate((p.rot ?? 0) + this.t); ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 4, 0, Math.PI * .6); ctx.closePath(); ctx.fill(); ctx.restore(); }
   }
   // captions
   const lang = this.state.lang;
@@ -296,7 +302,7 @@ export function renderScene() {
       const cy = Math.max(90, SY(this.g(c.x)) - cr.offsetHeight - 120);
       cr.style.transform = `translate(${cx}px, ${cy}px)`;
     }
-    this.cardOp = op; cr.style.opacity = op; cr.style.pointerEvents = op > .5 ? 'auto' : 'none';
+    this.cardOp = op; cr.style.opacity = String(op); cr.style.pointerEvents = op > .5 ? 'auto' : 'none';
   }
   // progress
   if (!this.introDone) return;

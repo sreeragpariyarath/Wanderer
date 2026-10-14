@@ -1,11 +1,12 @@
 'use client';
 import { useEffect, useReducer, useRef } from 'react';
+import type { CSSProperties } from 'react';
 import WandererEngine from '@/lib/WandererEngine';
 
-const circleBtn = { width: 30, height: 30, borderRadius: '50%', border: '1px solid var(--color-neutral-500)', cursor: 'pointer', fontFamily: 'var(--font-heading)', fontSize: 17, color: 'var(--color-text)', display: 'grid', placeItems: 'center', padding: 0 };
+const circleBtn: CSSProperties = { width: 30, height: 30, borderRadius: '50%', border: '1px solid var(--color-neutral-500)', cursor: 'pointer', fontFamily: 'var(--font-heading)', fontSize: 17, color: 'var(--color-text)', display: 'grid', placeItems: 'center', padding: 0 };
 
 export default function Wanderer() {
-  const ref = useRef(null);
+  const ref = useRef<WandererEngine | null>(null);
   if (!ref.current) ref.current = new WandererEngine();
   const engine = ref.current;
   const [, force] = useReducer(x => x + 1, 0);

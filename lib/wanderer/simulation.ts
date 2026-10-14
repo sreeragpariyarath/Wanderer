@@ -1,4 +1,6 @@
-export function advanceIntro(dt) {
+import type WandererEngine from '../WandererEngine';
+
+export function advanceIntro(this: WandererEngine, dt: number): void {
   const I = this.intro, SWX = -330, LEDGE = -150;
   this.t += dt; this.loadT = (performance.now() - this.loadStart) / 1000; I.t += dt; I.st += dt;
   const p = this.loadP = Math.min(1, Math.max(this.loadP, Math.min(1, this.loadT / 3.2)));
@@ -46,9 +48,9 @@ export function advanceIntro(dt) {
   this.camY += (this.figY - this.camY) * Math.min(1, dt * 3);
 }
 
-export function syncDirection() { const d = (this.keys.r ? 1 : 0) - (this.keys.l ? 1 : 0) + this.keys.btn; const dir = Math.max(-1, Math.min(1, d)); if (dir !== this.state.dir) this.setState({ dir }); }
+export function syncDirection(this: WandererEngine): void { const d = (this.keys.r ? 1 : 0) - (this.keys.l ? 1 : 0) + this.keys.btn; const dir = Math.max(-1, Math.min(1, d)); if (dir !== this.state.dir) this.setState({ dir }); }
 
-export function advanceWorld(dt) {
+export function advanceWorld(this: WandererEngine, dt: number): void {
   this.t += dt;
   let sp = 0, prevStep = 0;
   if (this.car.in) this.carStep(dt); else {
@@ -77,11 +79,11 @@ export function advanceWorld(dt) {
     if (this.nightV > 0.5 && Math.random() < dt / 2.2) this.shoot.push({ x: 0.35 + Math.random() * 0.75, y: 0.04 + Math.random() * 0.22, vx: -(480 + Math.random() * 300), vy: 170 + Math.random() * 120, life: 0.9 });
     this.shoot = this.shoot.filter(s => { const W = this.canvasRef.current ? this.canvasRef.current.clientWidth : 1000, H = this.canvasRef.current ? this.canvasRef.current.clientHeight : 800; s.x += s.vx * dt / W; s.y += s.vy * dt / H; s.life -= dt; return s.life > 0; }); }
   this.puffs = this.puffs.filter(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.r += dt * 9; p.life -= dt * 1.1; return p.life > 0; });
-  { const C = this.car; let cp = null;
+  { const C = this.car; let cp: 'drive' | 'enter' | null = null;
     if (C.in) { if (C.x - C.startX < 260 && C.x < this.ROAD_B - 60) cp = 'drive'; }
     else if (!C.arrived && Math.abs(this.x - C.x) < 90 && this.vy === 0) cp = 'enter';
     if (cp !== this.state.carPrompt) this.setState({ carPrompt: cp }); }
-  this.parts = this.parts.filter(p => { const dr = Math.exp(-(p.drag || 0) * dt); p.vx *= dr; p.vy = p.vy * dr + (p.g ?? 700) * dt; p.x += p.vx * dt; p.y += p.vy * dt; if (p.vr) p.rot += p.vr * dt; p.life -= dt; return p.life > 0; });
+  this.parts = this.parts.filter(p => { const dr = Math.exp(-(p.drag || 0) * dt); p.vx *= dr; p.vy = p.vy * dr + (p.g ?? 700) * dt; p.x += p.vx * dt; p.y += p.vy * dt; if (p.vr) p.rot = (p.rot ?? 0) + p.vr * dt; p.life -= dt; return p.life > 0; });
   this.camY += (this.figY - this.camY) * Math.min(1, dt * (this.launch ? 1.4 : 3));
   this.form = this.form ?? 1; this.form += ((Math.abs(this.v) > 20 ? 0.4 : 1) - this.form) * Math.min(1, dt * (Math.abs(this.v) > 20 ? 4 : 3));
   if (this.state.sound && sp > 20 && this.vy === 0 && Math.floor(this.phase / Math.PI) !== prevStep) this.tick();
@@ -94,7 +96,7 @@ export function advanceWorld(dt) {
   }
 }
 
-export function handleCarAction() {
+export function handleCarAction(this: WandererEngine): boolean {
   if (!this.introDone) return false;
   const C = this.car;
   if (C.in) { if (Math.abs(C.v) < 80) this.exitCar(); return true; }
@@ -102,13 +104,13 @@ export function handleCarAction() {
   return false;
 }
 
-export function leaveCar() {
+export function leaveCar(this: WandererEngine): void {
   const C = this.car; C.in = false; if (C.x >= this.ROAD_B - 1) C.arrived = true;
   C.v = 0; this.x = C.x + 125; this.v = 0; this.face = 1; this.figY = this.g(this.x); this.idle = 0;
   if (this.state.sound) this.tick(260, .1);
 }
 
-export function advanceCar(dt) {
+export function advanceCar(this: WandererEngine, dt: number): void {
   const C = this.car, dir = this.state.dir, RB = this.ROAD_B, RA = this.ROAD_A + 70;
   const tv = dir > 0 ? (this.keys.run ? 900 : 560) : dir < 0 ? -220 : 0;
   C.v += (tv - C.v) * Math.min(1, dt * (dir ? 1.5 : 2.2));

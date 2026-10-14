@@ -1,8 +1,11 @@
-export function seededRandom(i) { const s = Math.sin(i * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); }
+import type WandererEngine from '../WandererEngine';
+import type { CloudPoint, RGB, TreePoint } from './types';
 
-export function smoothStep(a, b, x) { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); }
+export function seededRandom(i: number): number { const s = Math.sin(i * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); }
 
-export function terrainHeight(x) {
+export function smoothStep(a: number, b: number, x: number): number { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); }
+
+export function terrainHeight(this: WandererEngine, x: number): number {
   let y = Math.sin(x * 0.0018) * 10 + Math.sin(x * 0.0007 + 1) * 14;
   y *= 1 - (this.ss(6850, 7000, x) - this.ss(8300, 8360, x));
   y += 260 * this.ss(8300, 8420, x);
@@ -15,14 +18,14 @@ export function terrainHeight(x) {
   return y;
 }
 
-export function darknessAt(x) { return this.ss(8360, 8520, x) - this.ss(11100, 12100, x) + this.ss(13900, 14300, x); }
+export function darknessAt(this: WandererEngine, x: number): number { return this.ss(8360, 8520, x) - this.ss(11100, 12100, x) + this.ss(13900, 14300, x); }
 
-export function readColor(str) { const c = this._c || (this._c = document.createElement('canvas').getContext('2d', { willReadFrequently: true })); c.clearRect(0, 0, 1, 1); c.fillStyle = '#000'; c.fillStyle = str; c.fillRect(0, 0, 1, 1); const d = c.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2]]; }
+export function readColor(this: WandererEngine, str: string): RGB { const c = this._c || (this._c = document.createElement('canvas').getContext('2d', { willReadFrequently: true })); if (!c) return [0, 0, 0]; c.clearRect(0, 0, 1, 1); c.fillStyle = '#000'; c.fillStyle = str; c.fillRect(0, 0, 1, 1); const d = c.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2]]; }
 
-export function mixColor(a, b, t) { return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(',')})`; }
+export function mixColor(a: RGB, b: RGB, t: number): string { return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(',')})`; }
 
-export function createTreePoints(seed, h, type) {
-  const pts = [];
+export function createTreePoints(this: WandererEngine, seed: number, h: number, type: number): TreePoint[] {
+  const pts: TreePoint[] = [];
   const T = [
     { R: .32, sx: 1, sy: .9, trunk: .38, blobs: [[0, 0, 1], [-.55, .35, .7], [.55, .3, .72], [-.2, -.45, .68], [.3, -.4, .62]] },
     { R: .22, sx: .9, sy: 1.6, trunk: .3, blobs: [[0, 0, 1], [0, -.7, .8], [0, .7, .85], [-.3, .2, .7], [.3, -.2, .7]] },
@@ -47,4 +50,4 @@ export function createTreePoints(seed, h, type) {
   return pts;
 }
 
-export function createCloudPoints(seed) { const pts = []; for (let i = 0; i < 90; i++) { const a = this.rand(seed + i * 3), b = this.rand(seed + i * 3 + 1), c = this.rand(seed + i * 3 + 2); pts.push({ x: (a - .5) * 240, y: (b - .5) * 60 * (1 - Math.abs(a - .5) * 1.4), r: .8 + c * 2.2, c }); } return pts; }
+export function createCloudPoints(this: WandererEngine, seed: number): CloudPoint[] { const pts: CloudPoint[] = []; for (let i = 0; i < 90; i++) { const a = this.rand(seed + i * 3), b = this.rand(seed + i * 3 + 1), c = this.rand(seed + i * 3 + 2); pts.push({ x: (a - .5) * 240, y: (b - .5) * 60 * (1 - Math.abs(a - .5) * 1.4), r: .8 + c * 2.2, c }); } return pts; }

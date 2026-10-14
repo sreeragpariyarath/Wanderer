@@ -1,4 +1,7 @@
-export function renderCar(ctx, cam, SY, w, col) {
+import type WandererEngine from '../WandererEngine';
+import type { RenderPalette, ScreenY } from './types';
+
+export function renderCar(this: WandererEngine, ctx: CanvasRenderingContext2D, cam: number, SY: ScreenY, w: number, col: RenderPalette): void {
   const C = this.car, sx = C.x - cam, rv = this.introDone ? 1 : Math.min(1, (this.intro.reveal || 0) / 700);
   if (rv <= 0) return;
   for (const p of this.puffs) { ctx.globalAlpha = p.life * 0.5 * rv; ctx.fillStyle = col.dot; ctx.beginPath(); ctx.arc(p.x - cam, SY(p.y), p.r * 0.6, 0, 7); ctx.fill(); }
@@ -52,7 +55,7 @@ export function renderCar(ctx, cam, SY, w, col) {
   ctx.restore(); ctx.globalAlpha = 1;
 }
 
-export function renderFigure(ctx, x, gy, C) {
+export function renderFigure(this: WandererEngine, ctx: CanvasRenderingContext2D, x: number, gy: number, C: RenderPalette): void {
   const s = this.sit, ph = this.phase, moving = Math.abs(this.v) > 4 && this.vy === 0;
   const amp = moving ? Math.min(1.5, Math.abs(this.v) / 170) : 0;
   const lean = Math.max(0, Math.abs(this.v) - 170) / 250 * 0.18;
@@ -61,21 +64,21 @@ export function renderFigure(ctx, x, gy, C) {
   ctx.strokeStyle = C.ink; ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   const Lg = 22, hipY = -2 * Lg + 2 - bob + s * 30, neckY = hipY - 34, headY = neckY - 13;
   const air = this.vy !== 0;
-  const ik = (fx, fy) => {
+  const ik = (fx: number, fy: number) => {
     const dx = fx, dy = fy - hipY, d = Math.min(Lg * 2 - 0.01, Math.hypot(dx, dy));
     const base = Math.atan2(dy, dx), off = Math.acos(d / (2 * Lg));
     const ka = base - off;
     const kx = Math.cos(ka) * Lg, ky = hipY + Math.sin(ka) * Lg;
     ctx.beginPath(); ctx.moveTo(0, hipY); ctx.lineTo(kx, ky); ctx.lineTo(fx, fy); ctx.lineTo(fx + 6, fy); ctx.stroke();
   };
-  const gait = p => { const stride = 13 * amp, c = Math.cos(p); return [Math.sin(p) * stride, -(c > 0 ? c * 7 * amp : 0)]; };
+  const gait = (p: number): [number, number] => { const stride = 13 * amp, c = Math.cos(p); return [Math.sin(p) * stride, -(c > 0 ? c * 7 * amp : 0)]; };
   if (s > 0.5) { ik(24, 0); ik(28, 0); }
   else if (air) { ik(10, hipY + 34); ik(-6, hipY + 38); }
   else { const a = gait(ph), b = gait(ph + Math.PI); ik(a[0], a[1]); ik(b[0], b[1]); }
   ctx.beginPath(); ctx.moveTo(-3, neckY); ctx.quadraticCurveTo(-9, hipY - 10, -8, hipY + 4); ctx.lineTo(8, hipY + 4); ctx.quadraticCurveTo(9, hipY - 10, 3, neckY); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(3, neckY); ctx.lineTo(-7, hipY - 6); ctx.stroke();
   ctx.strokeRect(-14, hipY - 10, 8, 9);
-  const arm = a => { const ex = Math.sin(a) * 13, ey = neckY + 4 + Math.cos(a) * 13; ctx.beginPath(); ctx.moveTo(0, neckY + 4); ctx.lineTo(ex, ey); ctx.lineTo(ex + Math.sin(a + 0.4) * 12, ey + Math.cos(a + 0.4) * 12); ctx.stroke(); };
+  const arm = (a: number) => { const ex = Math.sin(a) * 13, ey = neckY + 4 + Math.cos(a) * 13; ctx.beginPath(); ctx.moveTo(0, neckY + 4); ctx.lineTo(ex, ey); ctx.lineTo(ex + Math.sin(a + 0.4) * 12, ey + Math.cos(a + 0.4) * 12); ctx.stroke(); };
   if (s > 0.5) { ctx.beginPath(); ctx.moveTo(0, neckY + 4); ctx.lineTo(10, neckY + 16); ctx.lineTo(18, hipY - 8); ctx.stroke(); }
   else if (air) { arm(2.4); arm(-2.2); }
   else if (this.wave > 0) {

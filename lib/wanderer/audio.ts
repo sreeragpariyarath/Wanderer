@@ -1,4 +1,6 @@
-export function playTick(f, len) {
+import type WandererEngine from '../WandererEngine';
+
+export function playTick(this: WandererEngine, f?: number, len?: number): void {
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (!AudioContext) return;
   try { if (!this.ac || this.ac.state === 'closed') this.ac = new AudioContext(); } catch { this.ac = null; return; }
@@ -8,7 +10,7 @@ export function playTick(f, len) {
   o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime + l + .01);
 }
 
-export function toggleAudio() {
+export function toggleAudio(this: WandererEngine): void {
   const sound = !this.state.sound;
   if (sound) {
     const AudioContext = window.AudioContext || window.webkitAudioContext;

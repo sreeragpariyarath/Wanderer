@@ -46,23 +46,24 @@ Use the header controls to switch between English and Japanese or enable sound. 
 
 ```text
 app/                         Next.js App Router entry points and global CSS
-components/Wanderer.jsx      Client-side markup and controls
-lib/WandererEngine.js        Engine coordinator and lifecycle
-lib/wanderer/audio.js        Web Audio behavior
-lib/wanderer/simulation.js   Movement, vehicle, and intro state updates
-lib/wanderer/world.js        Terrain math and procedural point generation
-lib/wanderer/renderIntro.js  Introduction rendering
-lib/wanderer/renderActors.js Character and vehicle rendering
-lib/wanderer/renderEnvironment.js
+components/Wanderer.tsx      Client-side markup and typed controls
+lib/WandererEngine.ts        Engine coordinator and lifecycle
+lib/wanderer/audio.ts        Web Audio behavior
+lib/wanderer/simulation.ts   Movement, vehicle, and intro state updates
+lib/wanderer/world.ts        Terrain math and procedural point generation
+lib/wanderer/renderIntro.ts  Introduction rendering
+lib/wanderer/renderActors.ts Character and vehicle rendering
+lib/wanderer/renderEnvironment.ts
                              Environment and main scene rendering
-lib/wanderer/sceneData.js    Captions and story-card content
-lib/wanderer/ui.js           Language and UI view-model logic
+lib/wanderer/sceneData.ts    Typed captions and story-card content
+lib/wanderer/types.ts        Shared engine, scene, and rendering types
+lib/wanderer/ui.ts           Language and UI view-model logic
 ```
 
 `WandererEngine` remains the public coordinator. Its methods delegate to the focused modules under `lib/wanderer/`, allowing the simulation and render systems to evolve independently while sharing engine state.
 
 ## Development Notes
 
-The project uses JavaScript, React 19, and Next.js 15. Global design tokens, typography, and reusable component styles live in `app/globals.css`. Prefer those CSS variables when adjusting the visual system.
+The project uses strict TypeScript, React 19, and Next.js 15. Run `npm run typecheck` for a fast compiler-only check. Global design tokens, typography, and reusable component styles live in `app/globals.css`. Prefer those CSS variables when adjusting the visual system.
 
-No automated test or lint script is currently configured. Before submitting a change, run `npm run build` and manually verify movement, cards, the car, sound, language switching, loading behavior, and responsive canvas resizing.
+No automated behavioral test or lint script is currently configured. Before submitting a change, run `npm run typecheck` and `npm run build`, then manually verify movement, cards, the car, sound, language switching, loading behavior, and responsive canvas resizing.

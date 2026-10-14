@@ -1,4 +1,7 @@
-export function renderIntro(ctx, cam, SY, w, col) {
+import type WandererEngine from '../WandererEngine';
+import type { RenderPalette, ScreenY } from './types';
+
+export function renderIntro(this: WandererEngine, ctx: CanvasRenderingContext2D, cam: number, SY: ScreenY, w: number, col: RenderPalette): void {
   const I = this.intro;
   const fade = I.landT == null ? 1 : 1 - Math.min(1, Math.max(0, (this.t - I.landT - 0.2) / 1.1));
   if (fade <= 0) return;
@@ -6,18 +9,19 @@ export function renderIntro(ctx, cam, SY, w, col) {
   const main = ctx.canvas, oc = this._oc || (this._oc = document.createElement('canvas'));
   if (oc.width !== main.width || oc.height !== main.height) { oc.width = main.width; oc.height = main.height; }
   const o = oc.getContext('2d');
+  if (!o) return;
   o.setTransform(1, 0, 0, 1, 0, 0); o.clearRect(0, 0, oc.width, oc.height); o.setTransform(ctx.getTransform());
   this.drawIntroInner(o, cam, SY, w, col);
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = fade; ctx.drawImage(oc, 0, 0); ctx.restore();
 }
 
-export function renderIntroLayer(ctx, cam, SY, w, col) {
+export function renderIntroLayer(this: WandererEngine, ctx: CanvasRenderingContext2D, cam: number, SY: ScreenY, w: number, col: RenderPalette): void {
   const I = this.intro, SWX = -330, LEDGE = -150, PIV = LEDGE - 215, Lr = 165, p = this.loadP;
   if (cam > 40) return;
   if (!this.itree) {
     this.itree = [];
-    for (let i = 0; i < 60; i++) { const u = this.rand(i + 4000); this.itree.push({ x: SWX - 110 + (this.rand(i + 4100) - .5) * 9, y: LEDGE - u * (LEDGE - PIV) * -1 * -1 - 0, yy: PIV + u * (LEDGE - PIV), r: 1.3 + this.rand(i + 4200) * 2, t: 1 }); }
-    for (let i = 0; i < 30; i++) { const u = i / 29; this.itree.push({ x: SWX - 110 + u * 150, yy: PIV - Math.sin(u * 3) * 5 + (this.rand(i + 4300) - .5) * 3, r: 1.2 + this.rand(i + 4400) * 1.5, t: 1 }); }
+    for (let i = 0; i < 60; i++) { const u = this.rand(i + 4000); this.itree.push({ x: SWX - 110 + (this.rand(i + 4100) - .5) * 9, y: LEDGE - u * (LEDGE - PIV) * -1 * -1 - 0, yy: PIV + u * (LEDGE - PIV), r: 1.3 + this.rand(i + 4200) * 2, t: 1, c: 0 }); }
+    for (let i = 0; i < 30; i++) { const u = i / 29; this.itree.push({ x: SWX - 110 + u * 150, yy: PIV - Math.sin(u * 3) * 5 + (this.rand(i + 4300) - .5) * 3, r: 1.2 + this.rand(i + 4400) * 1.5, t: 1, c: 0 }); }
     for (let i = 0; i < 320; i++) { const an = this.rand(i + 4500) * 6.28, rr = Math.sqrt(this.rand(i + 4600)); this.itree.push({ x: SWX - 50 + Math.cos(an) * rr * 120, yy: PIV - 18 + Math.sin(an) * rr * 40, r: 1.3 + this.rand(i + 4700) * 2.6, t: 0, c: this.rand(i + 4800) }); }
   }
   // ledge (arrives with loading progress) + cliff face
