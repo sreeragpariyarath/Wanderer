@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This is a small Next.js 15 application using the App Router. Route-level files live in `app/`: `layout.js` defines document metadata and the root shell, `page.js` renders the experience, and `globals.css` owns global styles and design tokens. `components/Wanderer.jsx` is the client-facing React UI and input layer. `lib/WandererEngine.js` coordinates the experience, while focused modules under `lib/wanderer/` contain simulation, rendering, audio, UI state, world generation, and scene data. The `@/` alias resolves from the repository root, so prefer imports such as `@/components/Wanderer`.
+This Next.js 15 application uses the App Router. Route files live in `app/`; `globals.css` owns global styles and design tokens. `components/Wanderer.jsx` contains the client-facing React UI and controls. `lib/WandererEngine.js` coordinates lifecycle and shared state. Keep specialized behavior in `lib/wanderer/`: `simulation.js` updates movement and vehicles, `world.js` generates terrain, `audio.js` owns Web Audio, `ui.js` builds the view model, `sceneData.js` stores copy, and the `render*.js` modules draw the canvas. The `@/` alias resolves from the repository root.
 
 There is currently no dedicated test or public-assets directory. Add static files under `public/` and colocate future tests with their subject or place them under `tests/`, but stay consistent once a pattern is established.
 
@@ -19,7 +19,7 @@ No lint or automated test script is configured. Before submitting changes, at mi
 
 Follow the existing JavaScript and JSX style: two-space indentation, single quotes, semicolons, and ES modules. Use PascalCase for React components and classes (`Wanderer`, `WandererEngine`), camelCase for functions and variables, and descriptive CSS custom properties such as `--color-accent-500`. Keep route files named according to Next.js conventions (`page.js`, `layout.js`).
 
-Preserve the boundary between declarative UI in `components/` and canvas/state behavior in `lib/`. Reuse the tokens in `app/globals.css` rather than introducing isolated color, spacing, or typography values.
+Preserve the boundary between declarative UI in `components/` and canvas/state behavior in `lib/`. Add behavior to the narrowest relevant `lib/wanderer/` module instead of expanding the coordinator. Reuse tokens from `app/globals.css` rather than introducing isolated color, spacing, or typography values.
 
 ## Testing Guidelines
 
@@ -27,4 +27,4 @@ Manual checks should cover A/D and arrow-key movement, Shift-to-run, Space inter
 
 ## Commit & Pull Request Guidelines
 
-Git history is not available in this checkout, so no repository-specific commit convention can be inferred. Use concise, imperative subjects (for example, `Fix card positioning near river`). Keep commits focused. Pull requests should explain the user-visible change, list validation performed, link relevant issues, and include screenshots or a short recording for visual or animation changes.
+Recent history uses short subjects such as `Add Wanderer application`. Continue with concise, imperative commit messages (for example, `Fix card positioning near river`) and keep each commit focused. Pull requests should explain the user-visible change, list validation performed, link relevant issues, and include screenshots or a short recording for visual or animation changes.
