@@ -1,5 +1,5 @@
 import type { CharacterState } from './character';
-import { WORLD } from './config';
+import { CHECKPOINTS, WORLD } from './config';
 import type { VehicleState } from './types';
 export const SAVE_KEY = 'wanderer-save-v1';
 export const LEGACY_KEY = 'wanderer-x2';
@@ -30,6 +30,12 @@ function finite(value: unknown, min: number, max: number): value is number {
 export function safePosition(x: number): number {
   return x >= WORLD.launchX && x < WORLD.islandStart ? WORLD.launchX - 10 : x;
 }
+export function checkpointPosition(x: number): number {
+  const safe = safePosition(x);
+  for (let index = CHECKPOINTS.length - 1; index >= 0; index--)
+    if (safe >= CHECKPOINTS[index]) return CHECKPOINTS[index];
+  return WORLD.startX;
+}
 export function parseSave(raw: string): JourneySave | null {
   try {
     const v: unknown = JSON.parse(raw);
@@ -55,6 +61,8 @@ export function parseSave(raw: string): JourneySave | null {
       return null;
     return {
       version: 1,
+      // Accept exact positions from older saves. The next autosave converts
+      // them to a named safe checkpoint through captureJourney().
       x: safePosition(v.x),
       introComplete: true,
       lang: 'en',
@@ -80,7 +88,7 @@ export function readJourney(storage: StoragePort): JourneySave | null {
     if (!finite(x, WORLD.minX, WORLD.maxX)) return null;
     const migrated: JourneySave = {
       version: 1,
-      x: safePosition(x),
+      x: checkpointPosition(x),
       introComplete: true,
       lang: 'en',
       sound: false,
@@ -104,7 +112,7 @@ export function captureJourney(
 ): JourneySave {
   return {
     version: 1,
-    x: safePosition(c.safeX),
+    x: checkpointPosition(c.safeX),
     introComplete: true,
     lang: 'en',
     sound,

@@ -62,10 +62,24 @@ describe('journey saves', () => {
   ])('rejects invalid save %s', (raw) => expect(parseSave(raw)).toBeNull());
   it('normalizes launch-gap coordinates', () =>
     expect(parseSave(JSON.stringify({ ...save(), x: 13850 }))?.x).toBe(13790));
+  it.each([
+    [120, 120],
+    [5100, 3500],
+    [6688, 6680],
+    [9000, 8600],
+    [13000, 11800],
+    [14500, 14000],
+  ])('saves section checkpoint %s as %s', (x, checkpoint) => {
+    const scene = createScene();
+    placeCharacter(scene.character, x);
+    expect(captureJourney(scene.character, scene.vehicle, false).x).toBe(
+      checkpoint,
+    );
+  });
   it('migrates legacy only after a successful write', () => {
     const storage = new MemoryStorage();
     storage.setItem(LEGACY_KEY, '7550');
-    expect(readJourney(storage)?.x).toBe(7550);
+    expect(readJourney(storage)?.x).toBe(6680);
     expect(storage.getItem(LEGACY_KEY)).toBeNull();
     expect(storage.getItem(SAVE_KEY)).not.toBeNull();
   });
@@ -75,7 +89,7 @@ describe('journey saves', () => {
     storage.setItem = () => {
       throw Error('blocked');
     };
-    expect(readJourney(storage)?.x).toBe(7550);
+    expect(readJourney(storage)?.x).toBe(6680);
     expect(storage.getItem(LEGACY_KEY)).toBe('7550');
   });
   it('handles storage access errors', () =>
@@ -95,7 +109,7 @@ describe('journey saves', () => {
     s.character.x = 14000;
     s.character.velocityY = -500;
     const saved = captureJourney(s.character, s.vehicle, false);
-    expect(saved.x).toBe(13790);
+    expect(saved.x).toBe(11800);
     expect(saved).not.toHaveProperty('vy');
   });
   it('throttles changed writes and flushes once', () => {

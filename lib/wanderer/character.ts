@@ -29,6 +29,7 @@ export type SceneEvent = {
     | 'intro-complete';
   x: number;
   y: number;
+  automatic?: boolean;
 };
 export interface Movement {
   direction: -1 | 0 | 1;

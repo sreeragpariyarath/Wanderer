@@ -154,7 +154,10 @@ describe('lifecycle and browser boundary', () => {
     placeCharacter(scene.character, 5100);
     localStorage.setItem(
       SAVE_KEY,
-      JSON.stringify(captureJourney(scene.character, scene.vehicle, false)),
+      JSON.stringify({
+        ...captureJourney(scene.character, scene.vehicle, false),
+        x: 5100,
+      }),
     );
     const engine = new WandererEngine(),
       { canvas, overlays } = mount();

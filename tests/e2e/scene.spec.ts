@@ -58,6 +58,17 @@ test('first visit skips immediately, uses English and restores sound preferences
   ).toBeHidden();
   expect(errors).toEqual([]);
 });
+test('refresh restores the latest reached section checkpoint', async ({
+  page,
+}) => {
+  await seed(page, 5100);
+  await page.goto('/');
+  await expect
+    .poll(() => progress(page), { timeout: 3000 })
+    .toMatchObject({ x: 3500 });
+  await page.reload();
+  await expect.poll(() => progress(page)).toMatchObject({ x: 3500 });
+});
 test('story opens with pointer and keyboard; repeat does not toggle; stays within viewport', async ({
   page,
 }) => {

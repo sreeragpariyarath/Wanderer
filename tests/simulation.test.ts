@@ -189,9 +189,12 @@ describe('vehicle', () => {
     expect(s.character.x).toBe(WORLD.roadEnd + 18);
     expect(s.character.velocityX).toBeGreaterThan(0);
     const exitX = s.character.x;
-    updateCharacter(s.character, { direction: 1, run: false }, STEP);
+    for (let i = 0; i < 90; i++)
+      updateCharacter(s.character, { direction: 0, run: false }, STEP);
     expect(s.character.mode).toBe('grounded');
     expect(s.character.x).toBeGreaterThan(exitX);
+    expect(s.character.x).toBeLessThan(exitX + 25);
+    expect(Math.abs(s.character.velocityX)).toBeLessThan(0.1);
     expect(canEnterVehicle(s.vehicle, s.character)).toBe(false);
   });
 });

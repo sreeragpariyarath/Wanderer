@@ -22,3 +22,8 @@ export const MOTION = {
 } as const;
 export const STEP = 1 / 60;
 export const PARTICLE_LIMIT = 1200;
+
+// Stable, walkable section starts used when restoring a journey. Progress is
+// saved at these points so a refresh never places the character inside a
+// transition, jump, or other scripted moment.
+export const CHECKPOINTS = [120, 3500, 6680, 8600, 11800, 14000] as const;

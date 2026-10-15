@@ -28,7 +28,7 @@ export function exitVehicle(
     c.velocityX = MOTION.walk * 0.55;
     c.sitting = 1;
   }
-  return { type: 'vehicle-exit', x: c.x, y: c.y };
+  return { type: 'vehicle-exit', x: c.x, y: c.y, automatic: walkOut };
 }
 export function interactVehicle(
   car: VehicleState,
