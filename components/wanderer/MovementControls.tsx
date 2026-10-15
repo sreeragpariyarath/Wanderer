@@ -39,17 +39,48 @@ export function MovementControls({
       onKeyDown={(e) => {
         if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) {
           e.preventDefault();
-          hold(action === 'left' ? -1 : action === 'right' ? -2 : -3, action);
+          hold(
+            action === 'left'
+              ? -1
+              : action === 'right'
+                ? -2
+                : action === 'run'
+                  ? -3
+                  : action === 'up'
+                    ? -4
+                    : -5,
+            action,
+          );
         }
       }}
       onKeyUp={(e) => {
         if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault();
-          release(action === 'left' ? -1 : action === 'right' ? -2 : -3);
+          release(
+            action === 'left'
+              ? -1
+              : action === 'right'
+                ? -2
+                : action === 'run'
+                  ? -3
+                  : action === 'up'
+                    ? -4
+                    : -5,
+          );
         }
       }}
       onBlur={() =>
-        release(action === 'left' ? -1 : action === 'right' ? -2 : -3)
+        release(
+          action === 'left'
+            ? -1
+            : action === 'right'
+              ? -2
+              : action === 'run'
+                ? -3
+                : action === 'up'
+                  ? -4
+                  : -5,
+        )
       }
     >
       {key}
@@ -62,6 +93,13 @@ export function MovementControls({
       {button('right', text.forward, 'D', view.direction > 0)}
       <span>{text.forward}</span>
       <span className="control-divider" />
+      {view.swimming && (
+        <>
+          {button('up', text.swimUp, 'W', view.verticalDirection < 0)}
+          {button('down', text.swimDown, 'S', view.verticalDirection > 0)}
+          <span className="control-divider" />
+        </>
+      )}
       {button('run', text.run, 'SHIFT', view.run)}
       <span>{text.run}</span>
       {view.action && (

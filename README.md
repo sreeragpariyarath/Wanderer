@@ -13,12 +13,12 @@ Open http://localhost:3000. Production: `npm run build`, then `npm start`.
 
 ## Controls and saved journeys
 
-- A / Left Arrow and D / Right Arrow move; Shift runs or accelerates.
+- A / Left Arrow and D / Right Arrow move; Shift runs or accelerates. In the river, W / Up Arrow and S / Down Arrow control swimming depth.
 - Space enters/exits a nearby car or opens a story card. Hold movement controls to drive. Exiting is disabled above the safe speed.
-- On-screen A, D, and Shift support simultaneous touch input. The contextual button provides car and card actions without a keyboard.
+- On-screen A, D, W, S, and Shift controls support simultaneous touch input when their actions are available. The contextual button provides car and card actions without a keyboard.
 - Story cards have their own Read and Close buttons. The header control toggles sound.
 - The introduction plays on a first visit and can be skipped immediately. Returning visits resume directly. Reduced-motion preference also skips it and freezes decorative animation.
-- Versioned local saves restore the last safe grounded position, car progress, and sound preference. Older Japanese preferences fall back to English. A saved driver resumes stopped in the car. Sound waits for a user gesture.
+- Versioned local saves restore the latest safe section checkpoint, car progress, and sound preference. River and scripted-jump positions normalize to a nearby safe checkpoint. Older Japanese preferences fall back to English. A saved driver resumes stopped in the car. Sound waits for a user gesture.
 - The old `wanderer-x2` position is migrated only after the new save is written successfully. Invalid/unavailable storage falls back to a fresh journey.
 
 ## Architecture
@@ -57,6 +57,6 @@ npm run build
 
 Unit tests cover physics, input sources, timing, lifecycle, storage, and render purity. Browser tests run in desktop Chromium and a touch-enabled mobile viewport. Their server uses port 3001. Deterministic starting positions are seeded through browser storage in test code; there is no production scene-positioning endpoint or debug global.
 
-Manual regression checks: normal/skip intro, walk/run/backtrack, bridge jump and splash, island landing, car entry/exit/arrival, pointer cancellation, two-finger movement, hidden-tab resume, sound, reload while driving, short-screen story scrolling, resize and orientation changes. Compare representative intro/city/forest/bridge/river/village/island screenshots when changing artwork.
+Manual regression checks: normal/skip intro, walk/run/backtrack, bridge jump, underwater W/S swimming and both river exits, island landing, car entry/exit/arrival, pointer cancellation, multi-touch movement, hidden-tab resume, sound, checkpoint restoration, short-screen story scrolling, resize and orientation changes. Compare representative intro/city/forest/bridge/river/village/island screenshots when changing artwork.
 
 Use `npm run format` to apply the repository formatter. Generated browser reports, screenshots, and local review artifacts are ignored by Git.

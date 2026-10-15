@@ -4,7 +4,7 @@ import { advanceIntro } from './loading';
 import { ParticleEmitter, emitSplash, updateParticles } from './particles';
 import type { RenderState, SceneState } from './state';
 import { updateVehicle } from './vehicle';
-import { waterCrossing } from './water';
+import { enterWater, updateSwimming, waterCrossing } from './water';
 import { updateWeather } from './weather';
 
 interface PreviousPose {
@@ -46,14 +46,19 @@ export class SceneSimulation {
         previousY = s.character.y;
       events = s.vehicle.in
         ? updateVehicle(s.vehicle, s.character, input, dt)
-        : updateCharacter(s.character, input, dt);
+        : s.character.mode === 'swimming'
+          ? updateSwimming(s.character, input, dt)
+          : updateCharacter(s.character, input, dt);
       const splash = waterCrossing(
         previousX,
         previousY,
         s.character.x,
         s.character.y,
       );
-      if (splash) events.push(splash);
+      if (splash) {
+        enterWater(s.character);
+        events.push(splash);
+      }
     }
     for (const event of events)
       if (event.type === 'splash' && !s.reducedMotion)

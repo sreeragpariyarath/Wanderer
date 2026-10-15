@@ -4,6 +4,8 @@ export function labels() {
     back: 'back',
     forward: 'forward',
     run: 'run',
+    swimUp: 'swim up',
+    swimDown: 'swim down',
     enter: 'Get in the car',
     exit: 'Get out of the car',
     drive: 'Hold to drive · Shift to speed up',

@@ -28,6 +28,10 @@ function finite(value: unknown, min: number, max: number): value is number {
   );
 }
 export function safePosition(x: number): number {
+  if (x > WORLD.waterStart && x < WORLD.waterEnd)
+    return x < (WORLD.waterStart + WORLD.waterEnd) / 2
+      ? WORLD.waterStart - 50
+      : WORLD.waterEnd + 20;
   return x >= WORLD.launchX && x < WORLD.islandStart ? WORLD.launchX - 10 : x;
 }
 export function checkpointPosition(x: number): number {

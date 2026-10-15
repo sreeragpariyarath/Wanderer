@@ -62,11 +62,16 @@ describe('journey saves', () => {
   ])('rejects invalid save %s', (raw) => expect(parseSave(raw)).toBeNull());
   it('normalizes launch-gap coordinates', () =>
     expect(parseSave(JSON.stringify({ ...save(), x: 13850 }))?.x).toBe(13790));
+  it('normalizes older saves inside the river to a safe bank', () => {
+    expect(parseSave(JSON.stringify({ ...save(), x: 8400 }))?.x).toBe(8200);
+    expect(parseSave(JSON.stringify({ ...save(), x: 9000 }))?.x).toBe(9120);
+  });
   it.each([
     [120, 120],
     [5100, 3500],
     [6688, 6680],
-    [9000, 8600],
+    [8500, 8200],
+    [10000, 9120],
     [13000, 11800],
     [14500, 14000],
   ])('saves section checkpoint %s as %s', (x, checkpoint) => {

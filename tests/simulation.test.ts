@@ -16,13 +16,14 @@ import {
   updateParticles,
 } from '../lib/wanderer/particles';
 import { terrainHeight } from '../lib/wanderer/terrain';
+import { SceneSimulation } from '../lib/wanderer/simulation';
 import type { Particle, Puff } from '../lib/wanderer/types';
 import {
   canEnterVehicle,
   interactVehicle,
   updateVehicle,
 } from '../lib/wanderer/vehicle';
-import { waterCrossing } from '../lib/wanderer/water';
+import { riverBedY, waterCrossing } from '../lib/wanderer/water';
 import { updateWeather } from '../lib/wanderer/weather';
 
 describe('character physics', () => {
@@ -198,6 +199,53 @@ describe('vehicle', () => {
     expect(canEnterVehicle(s.vehicle, s.character)).toBe(false);
   });
 });
+describe('river swimming', () => {
+  it('enters once, swims up and down, and climbs onto the far bank', () => {
+    const scene = createScene();
+    completeIntro(scene);
+    placeCharacter(scene.character, WORLD.bridgeEnd - 1);
+    scene.character.velocityX = 170;
+    const simulation = new SceneSimulation(scene, () => 0.5);
+    let splashes = 0;
+    for (let i = 0; i < 180 && scene.character.mode !== 'swimming'; i++)
+      splashes += simulation
+        .update({ direction: 1, verticalDirection: 0, run: false }, STEP, {
+          width: 1280,
+          height: 800,
+        })
+        .filter((event) => event.type === 'splash').length;
+    expect(scene.character.mode).toBe('swimming');
+    expect(splashes).toBe(1);
+
+    scene.character.y = riverBedY(scene.character.x) - 18;
+    const deepY = scene.character.y;
+    for (let i = 0; i < 45; i++)
+      simulation.update(
+        { direction: 0, verticalDirection: -1, run: false },
+        STEP,
+        { width: 1280, height: 800 },
+      );
+    expect(scene.character.y).toBeLessThan(deepY - 20);
+    const highY = scene.character.y;
+    for (let i = 0; i < 60; i++)
+      simulation.update(
+        { direction: 0, verticalDirection: 1, run: false },
+        STEP,
+        { width: 1280, height: 800 },
+      );
+    expect(scene.character.y).toBeGreaterThan(highY + 20);
+
+    for (let i = 0; i < 600 && scene.character.mode === 'swimming'; i++)
+      simulation.update(
+        { direction: 1, verticalDirection: 0, run: true },
+        STEP,
+        { width: 1280, height: 800 },
+      );
+    expect(scene.character.mode).toBe('grounded');
+    expect(scene.character.x).toBe(WORLD.waterEnd + 18);
+    expect(scene.character.velocityY).toBe(0);
+  });
+});
 describe('intro and input', () => {
   it('normal completion and immediate skip use the same playable state', () => {
     const normal = createScene(),
@@ -224,11 +272,23 @@ describe('intro and input', () => {
     input.hold('pointer:1', 'right');
     input.hold('pointer:2', 'run');
     input.release('pointer:1');
-    expect(input.snapshot()).toEqual({ direction: 1, run: true });
+    expect(input.snapshot()).toEqual({
+      direction: 1,
+      verticalDirection: 0,
+      run: true,
+    });
+    input.hold('key:KeyW', 'up');
+    expect(input.snapshot().verticalDirection).toBe(-1);
+    input.hold('pointer:3', 'down');
+    expect(input.snapshot().verticalDirection).toBe(0);
     input.hold('key:KeyA', 'left');
     expect(input.snapshot().direction).toBe(0);
     input.clear();
-    expect(input.snapshot()).toEqual({ direction: 0, run: false });
+    expect(input.snapshot()).toEqual({
+      direction: 0,
+      verticalDirection: 0,
+      run: false,
+    });
   });
 });
 describe('effects', () => {

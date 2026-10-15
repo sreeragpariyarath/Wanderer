@@ -4,6 +4,8 @@ import { canEnterVehicle } from './vehicle';
 export interface ViewModel {
   sound: boolean;
   direction: -1 | 0 | 1;
+  verticalDirection: -1 | 0 | 1;
+  swimming: boolean;
   run: boolean;
   ready: boolean;
   introProgress: number;
@@ -17,6 +19,8 @@ export interface ViewModel {
 export const INITIAL_VIEW: ViewModel = {
   sound: false,
   direction: 0,
+  verticalDirection: 0,
+  swimming: false,
   run: false,
   ready: false,
   introProgress: 0,
@@ -57,6 +61,8 @@ export function deriveView(
   return {
     ...previous,
     direction: input.direction,
+    verticalDirection: input.verticalDirection ?? 0,
+    swimming: s.character.mode === 'swimming',
     run: input.run,
     ready: s.introDone,
     introProgress: Math.round(s.introProgress * 100),

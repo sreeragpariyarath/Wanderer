@@ -7,7 +7,8 @@ export function renderFigure(
   gy: number,
   C: RenderPalette,
 ): void {
-  const sitting = s.character.sitting,
+  const swimming = s.character.mode === 'swimming',
+    sitting = s.character.sitting,
     ph = s.character.gaitPhase,
     moving = Math.abs(s.character.velocityX) > 4 && s.character.velocityY === 0;
   const amp = moving ? Math.min(1.5, Math.abs(s.character.velocityX) / 170) : 0;
@@ -16,7 +17,7 @@ export function renderFigure(
   const bob = Math.abs(Math.sin(ph)) * 2 * amp;
   ctx.save();
   ctx.translate(x, gy);
-  ctx.rotate(lean * s.character.facing);
+  ctx.rotate((swimming ? -0.62 : lean) * s.character.facing);
   ctx.scale(s.character.facing, 1);
   ctx.strokeStyle = C.ink;
   ctx.lineWidth = 1.6;
@@ -26,7 +27,7 @@ export function renderFigure(
     hipY = -2 * Lg + 2 - bob + sitting * 30,
     neckY = hipY - 34,
     headY = neckY - 13;
-  const air = s.character.velocityY !== 0;
+  const air = !swimming && s.character.velocityY !== 0;
   const ik = (fx: number, fy: number) => {
     const dx = fx,
       dy = fy - hipY,
@@ -48,7 +49,10 @@ export function renderFigure(
       c = Math.cos(p);
     return [Math.sin(p) * stride, -(c > 0 ? c * 7 * amp : 0)];
   };
-  if (sitting > 0.5) {
+  if (swimming) {
+    ik(-19 + Math.sin(ph) * 6, hipY + 13);
+    ik(-21 + Math.sin(ph + Math.PI) * 6, hipY + 25);
+  } else if (sitting > 0.5) {
     ik(24, 0);
     ik(28, 0);
   } else if (air) {
@@ -80,7 +84,10 @@ export function renderFigure(
     ctx.lineTo(ex + Math.sin(a + 0.4) * 12, ey + Math.cos(a + 0.4) * 12);
     ctx.stroke();
   };
-  if (sitting > 0.5) {
+  if (swimming) {
+    arm(1.5 + Math.sin(ph) * 0.7);
+    arm(-1.5 + Math.sin(ph + Math.PI) * 0.7);
+  } else if (sitting > 0.5) {
     ctx.beginPath();
     ctx.moveTo(0, neckY + 4);
     ctx.lineTo(10, neckY + 16);

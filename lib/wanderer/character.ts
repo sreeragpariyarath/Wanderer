@@ -3,7 +3,12 @@ import { crossesForward, integrateVertical } from './physics';
 import { terrainHeight } from './terrain';
 
 export type CharacterMode =
-  'introductory' | 'grounded' | 'airborne' | 'scripted-launch' | 'seated';
+  | 'introductory'
+  | 'grounded'
+  | 'airborne'
+  | 'scripted-launch'
+  | 'swimming'
+  | 'seated';
 export interface CharacterState {
   mode: CharacterMode;
   x: number;
@@ -33,6 +38,7 @@ export type SceneEvent = {
 };
 export interface Movement {
   direction: -1 | 0 | 1;
+  verticalDirection?: -1 | 0 | 1;
   run: boolean;
 }
 export function createCharacter(): CharacterState {
@@ -68,7 +74,8 @@ export function updateCharacter(
   input: Movement,
   dt: number,
 ): SceneEvent[] {
-  if (c.mode === 'introductory' || c.mode === 'seated') return [];
+  if (c.mode === 'introductory' || c.mode === 'seated' || c.mode === 'swimming')
+    return [];
   const events: SceneEvent[] = [];
   const previousX = c.x;
   const wasGrounded = c.mode === 'grounded';

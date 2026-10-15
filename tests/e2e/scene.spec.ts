@@ -69,6 +69,35 @@ test('refresh restores the latest reached section checkpoint', async ({
   await page.reload();
   await expect.poll(() => progress(page)).toMatchObject({ x: 3500 });
 });
+test('river exposes vertical swim controls and reaches the far bank', async ({
+  page,
+}, info) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await seed(page, 8200);
+  await page.goto('/');
+  await page.locator('canvas').click({ position: { x: 20, y: 20 } });
+  await page.keyboard.down('d');
+  const swimUp = page.getByRole('button', { name: 'swim up' });
+  const swimDown = page.getByRole('button', { name: 'swim down' });
+  await expect(swimUp).toBeVisible({ timeout: 7000 });
+  await page.keyboard.up('d');
+  await page.keyboard.down('s');
+  await expect(swimDown).toHaveAttribute('aria-pressed', 'true');
+  await page.waitForTimeout(400);
+  await page.keyboard.up('s');
+  await page.keyboard.down('w');
+  await expect(swimUp).toHaveAttribute('aria-pressed', 'true');
+  await page.waitForTimeout(400);
+  await page.keyboard.up('w');
+  await page.screenshot({ path: info.outputPath('underwater-river.png') });
+  await page.keyboard.down('Shift');
+  await page.keyboard.down('d');
+  await expect(swimUp).toBeHidden({ timeout: 9000 });
+  await page.keyboard.up('d');
+  await page.keyboard.up('Shift');
+  expect(errors).toEqual([]);
+});
 test('story opens with pointer and keyboard; repeat does not toggle; stays within viewport', async ({
   page,
 }) => {

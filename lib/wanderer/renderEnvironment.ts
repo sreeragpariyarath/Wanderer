@@ -12,7 +12,7 @@ import { terrainHeight } from './terrain';
 import { renderTrees } from './trees';
 import { renderCar } from './vehicleRender';
 import { renderVillage } from './village';
-import { renderWater } from './water';
+import { renderWater, renderWaterOverlay } from './water';
 import {
   renderFlakes,
   renderRain,
@@ -129,4 +129,5 @@ export function renderEnvironment(s: RenderState, frame: Frame): void {
   if (!s.intro.onSwing && !s.vehicle.in)
     renderFigure(s, ctx, s.character.x - cam, SY(s.character.y), col);
   if (s.vehicle.in) renderCar(s, ctx, cam, SY, w, col);
+  renderWaterOverlay(s, frame);
 }
