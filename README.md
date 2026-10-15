@@ -1,69 +1,62 @@
 # Wanderer
 
-Wanderer is an interactive, side-scrolling canvas experience built with Next.js and React. Walk through a procedurally illustrated world containing a city, forest, river, changing weather, village, story cards, and a driveable car.
+An interactive, side-scrolling Canvas 2D experience built with Next.js 15, React 19, and strict TypeScript. Walk or drive through a procedurally illustrated city, forest, river, village, and floating island, with English story cards.
 
-## Features
+## Development
 
-- Responsive Canvas 2D scene with procedural terrain and scenery
-- Keyboard and pointer controls for walking, running, and driving
-- Animated loading sequence and environmental transitions
-- Expandable story cards positioned throughout the world
-- Optional generated sound effects using the Web Audio API
-- English and Japanese interface content
-- Automatic position persistence through browser local storage
-
-## Getting Started
-
-Install the dependencies and start the development server:
-
-```bash
+```sh
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in a browser.
+Open http://localhost:3000. Production: `npm run build`, then `npm start`.
 
-For a production build:
+## Controls and saved journeys
 
-```bash
+- A / Left Arrow and D / Right Arrow move; Shift runs or accelerates.
+- Space enters/exits a nearby car or opens a story card. Hold movement controls to drive. Exiting is disabled above the safe speed.
+- On-screen A, D, and Shift support simultaneous touch input. The contextual button provides car and card actions without a keyboard.
+- Story cards have their own Read and Close buttons. The header control toggles sound.
+- The introduction plays on a first visit and can be skipped immediately. Returning visits resume directly. Reduced-motion preference also skips it and freezes decorative animation.
+- Versioned local saves restore the last safe grounded position, car progress, and sound preference. Older Japanese preferences fall back to English. A saved driver resumes stopped in the car. Sound waits for a user gesture.
+- The old `wanderer-x2` position is migrated only after the new save is written successfully. Invalid/unavailable storage falls back to a fresh journey.
+
+## Architecture
+
+`components/Wanderer.tsx` mounts the browser engine and subscribes with `useSyncExternalStore`. Components under `components/wanderer/` own settings, loading, story content, and controls. Static styles and tokens live in `app/globals.css`.
+
+`lib/WandererEngine.ts` owns browser lifecycle and routes actions/events. Feature modules under `lib/wanderer/` receive explicit state and dependencies; none imports the engine class.
+
+| Modules                                                                 | Responsibility                                                       |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `character`, `physics`, `vehicle`                                       | Movement, collisions, automatic jumps, car transitions               |
+| `clock`, `camera`, `input`, `browserInput`                              | Fixed-step timing, camera smoothing, independent input sources       |
+| `loading`, `loadingRender`                                              | Intro state machine and drawing                                      |
+| `trees`, `buildings`, `clouds`, `bridge`, `water`, `village`, `terrain` | Individual world features                                            |
+| `weather`, `weatherRender`, `particles`                                 | Weather transitions, bounded effects, injected randomness            |
+| `characterRender`, `vehicleRender`, `renderEnvironment`, `renderer`     | Read-only drawing and browser canvas resources                       |
+| `viewModel`, `overlays`                                                 | Stable UI snapshots and the sole animated DOM-style adapter          |
+| `persistence`, `audio`                                                  | Validated optional storage and gesture-unlocked sound                |
+| `config`, `state`, `types`, `sceneData`, `initialize`                   | Tuning constants, state contracts, story copy, deterministic scenery |
+
+The engine runs 60 simulation steps per second and interpolates character, vehicle, and camera positions for rendering. Catch-up is capped at five steps. Hidden tabs pause and clear inputs, with elapsed time reset on return. Renderers receive deeply readonly scene views and never update simulation data. Canvas cache resources belong to the renderer and are released on disposal.
+
+The world uses positive-down Y coordinates. Bridge jumps and island launches are cinematic triggers. Water crossing emits a splash event without changing physics. Landing and vehicle events drive optional effects. Save data uses safe positions rather than transient flight coordinates.
+
+## Verification
+
+```sh
+npm run typecheck
+npm test
+npx playwright install chromium
+npm run test:e2e
+npm run lint
+npm run format:check
 npm run build
-npm start
 ```
 
-## Controls
+Unit tests cover physics, input sources, timing, lifecycle, storage, and render purity. Browser tests run in desktop Chromium and a touch-enabled mobile viewport. Their server uses port 3001. Deterministic starting positions are seeded through browser storage in test code; there is no production scene-positioning endpoint or debug global.
 
-| Input | Action |
-| --- | --- |
-| `A` / `←` | Move left |
-| `D` / `→` | Move right |
-| `Shift` | Run or accelerate |
-| `Space` | Enter/exit the car or expand a nearby card |
-| On-screen buttons | Pointer and touch movement |
+Manual regression checks: normal/skip intro, walk/run/backtrack, bridge jump and splash, island landing, car entry/exit/arrival, pointer cancellation, two-finger movement, hidden-tab resume, sound, reload while driving, short-screen story scrolling, resize and orientation changes. Compare representative intro/city/forest/bridge/river/village/island screenshots when changing artwork.
 
-Use the header controls to switch between English and Japanese or enable sound. The last world position is restored after the introduction on a later visit.
-
-## Project Structure
-
-```text
-app/                         Next.js App Router entry points and global CSS
-components/Wanderer.tsx      Client-side markup and typed controls
-lib/WandererEngine.ts        Engine coordinator and lifecycle
-lib/wanderer/audio.ts        Web Audio behavior
-lib/wanderer/simulation.ts   Movement, vehicle, and intro state updates
-lib/wanderer/world.ts        Terrain math and procedural point generation
-lib/wanderer/renderIntro.ts  Introduction rendering
-lib/wanderer/renderActors.ts Character and vehicle rendering
-lib/wanderer/renderEnvironment.ts
-                             Environment and main scene rendering
-lib/wanderer/sceneData.ts    Typed captions and story-card content
-lib/wanderer/types.ts        Shared engine, scene, and rendering types
-lib/wanderer/ui.ts           Language and UI view-model logic
-```
-
-`WandererEngine` remains the public coordinator. Its methods delegate to the focused modules under `lib/wanderer/`, allowing the simulation and render systems to evolve independently while sharing engine state.
-
-## Development Notes
-
-The project uses strict TypeScript, React 19, and Next.js 15. Run `npm run typecheck` for a fast compiler-only check. Global design tokens, typography, and reusable component styles live in `app/globals.css`. Prefer those CSS variables when adjusting the visual system.
-
-No automated behavioral test or lint script is currently configured. Before submitting a change, run `npm run typecheck` and `npm run build`, then manually verify movement, cards, the car, sound, language switching, loading behavior, and responsive canvas resizing.
+Use `npm run format` to apply the repository formatter. Generated browser reports, screenshots, and local review artifacts are ignored by Git.

@@ -1,31 +1,33 @@
 # Repository Guidelines
 
-## Project Structure & Module Organization
+## Structure and boundaries
 
-This strict TypeScript Next.js 15 application uses the App Router. Route files live in `app/`; `globals.css` owns global styles and tokens. `components/Wanderer.tsx` contains the React UI and controls. `lib/WandererEngine.ts` coordinates lifecycle and shared state. Keep specialized behavior in `lib/wanderer/`: `simulation.ts` updates movement and vehicles, `world.ts` generates terrain, `audio.ts` owns Web Audio, `ui.ts` builds the view model, `sceneData.ts` stores copy, `types.ts` defines shared contracts, and the `render*.ts` modules draw the canvas. The `@/` alias resolves from the repository root.
+This strict TypeScript Next.js 15 App Router application keeps routes in `app/` and UI styles/tokens in `app/globals.css`. `components/Wanderer.tsx` mounts the scene; `components/wanderer/` owns declarative React controls, settings, loading, and story cards.
 
-There is no test or public-assets directory. Put static files in `public/` and colocate future tests or place them consistently under `tests/`.
+`lib/WandererEngine.ts` coordinates browser lifecycle, UI subscriptions, and event routing. Specialized modules under `lib/wanderer/` own character/vehicle movement, physics, camera, input, weather, water, loading, audio, persistence, and individual scenery renderers. See README for the module map. The `@/` alias resolves from the root.
 
-## Build, Test, and Development Commands
+Feature modules must not import `WandererEngine` or use `.call(this)`. Accept explicit state and narrow dependencies. Renderers receive deeply readonly state and cannot advance the simulation. Browser canvas caches belong to `SceneRenderer`; animated DOM styles belong only to `overlays.ts`. UI content/accessibility belongs to React.
 
-- `npm install` installs the locked project dependencies (commit `package-lock.json` when generated).
-- `npm run dev` starts the local development server at `http://localhost:3000` with hot reload.
-- `npm run typecheck` runs the strict TypeScript compiler without emitting files.
-- `npm run build` creates a production build and catches Next.js compilation errors.
-- `npm start` serves the production build; run `npm run build` first.
+## Commands and validation
 
-No lint or automated test script is configured. Before submitting changes, at minimum run `npm run build` and manually exercise the scene in a browser.
+- `npm install`: install dependencies; commit lockfile changes.
+- `npm run dev`: development server on port 3000.
+- `npm run typecheck`: strict TypeScript checking.
+- `npm test`: Vitest behavioral and architecture regressions.
+- `npx playwright install chromium`: install the browser used by integration tests.
+- `npm run test:e2e`: desktop/mobile browser tests; test server uses port 3001.
+- `npm run lint` and `npm run format:check`: code quality checks.
+- `npm run format`: apply formatting.
+- `npm run build` then `npm start`: production build and server.
 
-## Coding Style & Naming Conventions
+Before submitting changes, run the relevant tests, typecheck, lint, format check, and production build. Manually verify movement, run, Space/contextual actions, pointer controls, loading, sound, persistence, and viewport resizing. Capture screenshots for artwork/layout changes.
 
-Follow the existing TypeScript and TSX style: two-space indentation, single quotes, semicolons, and ES modules. Keep strict types; avoid `any`, type shared engine data in `lib/wanderer/types.ts`, and annotate browser APIs explicitly. Use PascalCase for components, classes, and types; use camelCase for functions and variables. Keep route files named according to Next.js conventions (`page.tsx`, `layout.tsx`).
+## Coding conventions
 
-Preserve the boundary between declarative UI in `components/` and canvas/state behavior in `lib/`. Add behavior to the narrowest relevant `lib/wanderer/` module instead of expanding the coordinator. Reuse tokens from `app/globals.css` rather than introducing isolated color, spacing, or typography values.
+Use two-space indentation, single quotes, semicolons, and ES modules. Follow Prettier. Keep strict types; avoid `any`. Use descriptive state fields, PascalCase types/components/classes, and camelCase functions. Shared contracts live in `types.ts` or their owning feature module. Reuse CSS tokens.
 
-## Testing Guidelines
+Use the fixed simulation clock and time-based rates. Keep randomness injectable in effects. New state must have clear ownership and cleanup. Preserve validated versioned save compatibility; do not persist held inputs or transient velocities. Keep tests deterministic and put them under `tests/`, with browser tests in `tests/e2e/`. No production debug hooks for positioning scenes.
 
-Run `npm run typecheck` and `npm run build`. Manual checks should cover movement, Shift-to-run, Space interactions, pointer controls, loading, sound, languages, and viewport resizing. If adding tests, include an `npm test` script and use names such as `Wanderer.test.tsx` or `WandererEngine.test.ts`.
+## Commits and pull requests
 
-## Commit & Pull Request Guidelines
-
-Recent history uses short subjects such as `Add Wanderer application`. Continue with concise, imperative commit messages (for example, `Fix card positioning near river`) and keep each commit focused. Pull requests should explain the user-visible change, list validation performed, link relevant issues, and include screenshots or a short recording for visual or animation changes.
+Use concise imperative commit subjects and focused changes. PRs describe the user-visible change, validation, relevant issues, and screenshots/recordings for visual or animation changes.
