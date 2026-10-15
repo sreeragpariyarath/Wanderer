@@ -1,4 +1,3 @@
-export type Language = 'en' | 'ja';
 export type LocalizedCard = [string, string, string, string];
 export type RGB = [number, number, number];
 export type ScreenY = (worldY: number) => number;
@@ -6,27 +5,11 @@ export type ScreenY = (worldY: number) => number;
 export interface Caption {
   x: number;
   en: string;
-  ja: string;
 }
 
 export interface SceneCard {
   x: number;
   en: LocalizedCard;
-  ja: LocalizedCard;
-}
-
-export interface EngineState {
-  lang: Language;
-  sound: boolean;
-  dir: number;
-  card: number;
-  expanded: boolean;
-  run: boolean;
-  carPrompt: 'drive' | 'enter' | null;
-}
-
-export interface EngineRef<T> {
-  current: T | null;
 }
 
 export interface NumericPalette {
@@ -52,7 +35,6 @@ export interface TreePoint {
   trunk: boolean;
   c: number;
   shade?: number;
-  k?: number;
 }
 
 export interface CloudPoint {
@@ -62,8 +44,7 @@ export interface CloudPoint {
   c: number;
 }
 
-export interface Particle {
-  k: 'petal' | 'drop' | 'rect';
+interface ParticleBase {
   x: number;
   y: number;
   vx: number;
@@ -72,12 +53,13 @@ export interface Particle {
   drag: number;
   life: number;
   max: number;
-  rot?: number;
-  c?: string;
-  r?: number;
-  vr?: number;
-  w?: number;
 }
+export type Particle = ParticleBase &
+  (
+    | { k: 'petal'; rot: number; c: string }
+    | { k: 'drop'; r: number; c: string }
+    | { k: 'rect'; rot: number; vr: number; w: number }
+  );
 
 export interface DustParticle {
   x: number;
@@ -88,8 +70,7 @@ export interface DustParticle {
   c: string;
 }
 
-export interface IntroState {
-  state: 'swing' | 'ready' | 'leap' | 'walk' | 'jump' | 'land';
+interface IntroBase {
   t: number;
   st: number;
   A: number;
@@ -99,6 +80,15 @@ export interface IntroState {
   dust: DustParticle[];
   landT?: number;
 }
+export type IntroState = IntroBase &
+  (
+    | { state: 'swing' }
+    | { state: 'ready' }
+    | { state: 'leap' }
+    | { state: 'walk' }
+    | { state: 'jump' }
+    | { state: 'land' }
+  );
 
 export interface VehicleState {
   x: number;
@@ -162,5 +152,4 @@ export interface IntroTreePoint {
   r: number;
   t: number;
   c: number;
-  y?: number;
 }
