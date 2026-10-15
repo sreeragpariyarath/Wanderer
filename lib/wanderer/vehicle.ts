@@ -1,6 +1,6 @@
 import type { CharacterState, Movement, SceneEvent } from './character';
 import { placeCharacter } from './character';
-import { WORLD } from './config';
+import { MOTION, WORLD } from './config';
 import { terrainHeight } from './terrain';
 import type { VehicleState } from './types';
 
@@ -10,13 +10,24 @@ export function canEnterVehicle(
 ): boolean {
   return !car.arrived && c.mode === 'grounded' && Math.abs(c.x - car.x) < 90;
 }
-export function exitVehicle(car: VehicleState, c: CharacterState): SceneEvent {
+export function exitVehicle(
+  car: VehicleState,
+  c: CharacterState,
+  walkOut = false,
+): SceneEvent {
   car.in = false;
   car.v = 0;
   car.endT = 0;
   if (car.x >= WORLD.roadEnd - 1) car.arrived = true;
-  placeCharacter(c, Math.min(WORLD.maxX, car.x + 125));
+  placeCharacter(c, Math.min(WORLD.maxX, car.x + (walkOut ? 18 : 125)));
   c.facing = 1;
+  if (walkOut) {
+    // Continue out of the driver's side on the ground instead of popping ahead
+    // of the car in a single frame. The regular character update eases this
+    // velocity into the player's current movement input.
+    c.velocityX = MOTION.walk * 0.55;
+    c.sitting = 1;
+  }
   return { type: 'vehicle-exit', x: c.x, y: c.y };
 }
 export function interactVehicle(
@@ -83,7 +94,7 @@ export function updateVehicle(
   c.idleTime = 0;
   if (!car.arrived && car.x >= WORLD.roadEnd - 1 && Math.abs(car.v) < 5) {
     car.endT += dt;
-    if (car.endT > 0.7) return [exitVehicle(car, c)];
+    if (car.endT > 0.7) return [exitVehicle(car, c, true)];
   } else car.endT = 0;
   return [];
 }

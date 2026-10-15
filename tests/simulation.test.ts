@@ -184,6 +184,14 @@ describe('vehicle', () => {
     expect(exits).toBe(1);
     expect(s.vehicle.arrived).toBe(true);
     expect(s.vehicle.in).toBe(false);
+    expect(s.character.mode).toBe('grounded');
+    expect(s.character.velocityY).toBe(0);
+    expect(s.character.x).toBe(WORLD.roadEnd + 18);
+    expect(s.character.velocityX).toBeGreaterThan(0);
+    const exitX = s.character.x;
+    updateCharacter(s.character, { direction: 1, run: false }, STEP);
+    expect(s.character.mode).toBe('grounded');
+    expect(s.character.x).toBeGreaterThan(exitX);
     expect(canEnterVehicle(s.vehicle, s.character)).toBe(false);
   });
 });
