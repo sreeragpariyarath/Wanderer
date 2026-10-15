@@ -112,8 +112,8 @@ describe('character physics', () => {
     expect(c.y).toBeCloseTo(terrainHeight(c.x, c.x));
   });
   it.each([
-    [60, -1],
-    [15940, 1],
+    [WORLD.minX, -1],
+    [WORLD.maxX, 1],
   ] as const)('stops at boundary %s', (x, direction) => {
     const c = createCharacter();
     placeCharacter(c, x);

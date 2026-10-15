@@ -193,7 +193,7 @@ function freeze(value: object): void {
     if (child && typeof child === 'object' && !Object.isFrozen(child))
       freeze(child);
 }
-it.each([120, 760, 5100, 7550, 8420, 9300, 10320, 13000, 14800])(
+it.each([70, 760, 5100, 7550, 8420, 9300, 10320, 13000, 14800])(
   'rendering at %s leaves all simulation data unchanged',
   (x) => {
     const s = createScene();

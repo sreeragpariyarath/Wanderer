@@ -47,7 +47,7 @@ export function createScene(): SceneState {
     '#5d6b5e',
   ];
   s.buildings = [];
-  let bx = 150,
+  let bx = 650,
     bi = 0;
   while (bx < 3500) {
     const bw = 90 + seededRandom(bi * 7 + 1) * 90,
@@ -66,7 +66,7 @@ export function createScene(): SceneState {
     bi++;
   }
   s.backgroundBuildings = [];
-  bx = -300;
+  bx = 400;
   bi = 0;
   while (bx < 4600) {
     const bw = 70 + seededRandom(bi * 5 + 500) * 110,

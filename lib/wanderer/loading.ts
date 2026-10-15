@@ -88,6 +88,7 @@ export function advanceIntro(
       if (s.character.x >= -14) {
         Object.assign(I, { state: 'jump' });
         s.character.velocityY = -330;
+        s.character.velocityX = 82;
       }
     } else if (I.state === 'jump') {
       s.character.x += s.character.velocityX * dt;

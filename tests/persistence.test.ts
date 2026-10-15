@@ -67,7 +67,7 @@ describe('journey saves', () => {
     expect(parseSave(JSON.stringify({ ...save(), x: 10000 }))?.x).toBe(10320);
   });
   it.each([
-    [120, 120],
+    [70, 70],
     [5100, 3500],
     [6688, 6680],
     [8500, 8200],
