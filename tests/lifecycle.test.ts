@@ -193,12 +193,16 @@ function freeze(value: object): void {
     if (child && typeof child === 'object' && !Object.isFrozen(child))
       freeze(child);
 }
-it.each([120, 760, 5100, 7550, 8420, 13000, 14800])(
+it.each([120, 760, 5100, 7550, 8420, 9300, 10320, 13000, 14800])(
   'rendering at %s leaves all simulation data unchanged',
   (x) => {
     const s = createScene();
     completeIntro(s);
     placeCharacter(s.character, x);
+    if (x === 9300) {
+      s.character.mode = 'swimming';
+      s.character.y = 180;
+    }
     s.camera = { x, y: s.character.y };
     const before = JSON.stringify(s);
     freeze(s);

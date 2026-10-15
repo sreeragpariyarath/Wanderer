@@ -116,7 +116,8 @@ export function updateCharacter(
       c,
       ground,
       dt,
-      c.mode !== 'scripted-launch' || c.x >= WORLD.islandStart,
+      (c.mode !== 'scripted-launch' || c.x >= WORLD.islandStart) &&
+        !(c.x > WORLD.bridgeEnd && c.x < WORLD.waterEnd),
     )
   ) {
     c.mode = 'grounded';

@@ -1,4 +1,5 @@
 import type { Caption, SceneCard } from './types';
+import { WORLD } from './config';
 
 export const CAPTIONS: Caption[] = [
   {
@@ -12,6 +13,10 @@ export const CAPTIONS: Caption[] = [
   {
     x: 8280,
     en: 'The bridge ends before the river does.',
+  },
+  {
+    x: 10000,
+    en: 'Beyond the old boat, the river gives way to shore.',
   },
   {
     x: 11550,
@@ -43,7 +48,18 @@ export const CARDS: SceneCard[] = [
     ],
   },
   {
-    x: 9300,
+    x: WORLD.wreckX,
+    y: 220,
+    revealRadius: 180,
+    en: [
+      'River archive / Discovery',
+      'The Quiet Wreck',
+      'A broken wooden boat, resting among the river plants.',
+      'The hull is split and its mast has fallen, but the river has made a home of it. Small fish shelter between the ribs, and new plants grow through the planks. Pause here, then follow the current toward the shore.',
+    ],
+  },
+  {
+    x: 10600,
     en: [
       'Web / Tools / Automation',
       'Lantern',
@@ -52,7 +68,7 @@ export const CARDS: SceneCard[] = [
     ],
   },
   {
-    x: 10400,
+    x: 11100,
     en: [
       'Sound / Experiments',
       'Undertow',

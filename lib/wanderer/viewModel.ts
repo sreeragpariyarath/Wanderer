@@ -46,8 +46,14 @@ export function deriveView(
         distance = d;
       }
     });
+  const radius = s.cards[cardIndex]?.revealRadius;
   s.cardOpacity =
-    cardIndex < 0 ? 0 : Math.max(0, Math.min(1, 1.4 - distance / 500));
+    cardIndex < 0
+      ? 0
+      : Math.max(
+          0,
+          Math.min(1, radius ? (radius - distance) / 80 : 1.4 - distance / 500),
+        );
   const cardVisible = s.cardOpacity > 0.5;
   const carPrompt = !s.introDone
     ? null

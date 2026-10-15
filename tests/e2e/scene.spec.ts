@@ -93,9 +93,23 @@ test('river exposes vertical swim controls and reaches the far bank', async ({
   await page.screenshot({ path: info.outputPath('underwater-river.png') });
   await page.keyboard.down('Shift');
   await page.keyboard.down('d');
-  await expect(swimUp).toBeHidden({ timeout: 9000 });
+  const wreck = page
+    .locator('.story-card')
+    .filter({ hasText: 'The Quiet Wreck' });
+  await expect(wreck).toBeVisible({ timeout: 10000 });
+  await page.waitForTimeout(600);
   await page.keyboard.up('d');
   await page.keyboard.up('Shift');
+  await wreck.getByRole('button', { name: /Read story/ }).click();
+  await expect(wreck).toContainText('Small fish shelter');
+  await page.screenshot({ path: info.outputPath('wreck-discovery.png') });
+  await wreck.getByRole('button', { name: 'Close', exact: true }).click();
+  await page.keyboard.down('Shift');
+  await page.keyboard.down('d');
+  await expect(swimUp).toBeHidden({ timeout: 13000 });
+  await page.keyboard.up('d');
+  await page.keyboard.up('Shift');
+  await page.screenshot({ path: info.outputPath('river-shore.png') });
   expect(errors).toEqual([]);
 });
 test('story opens with pointer and keyboard; repeat does not toggle; stays within viewport', async ({

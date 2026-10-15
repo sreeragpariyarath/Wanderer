@@ -150,23 +150,3 @@ export function renderRain(
     }
   }
 }
-export function renderFlakes(
-  s: Pick<RenderState, 'flakes' | 'time'>,
-  frame: Frame,
-): void {
-  const { ctx, w, h, col, darkA } = frame;
-  // flakes
-  if (darkA > 0) {
-    ctx.fillStyle = col.ink;
-    for (const f of s.flakes) {
-      const y = ((f.y + s.time * f.sp * 0.12) % 1) * h,
-        x = (((f.x * w + Math.sin(s.time * 0.5 + f.rot) * 30) % w) + w) % w;
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(f.rot + s.time * f.sp);
-      ctx.globalAlpha = darkA * 0.75;
-      ctx.fillRect(-4, -1.5, 8, 3);
-      ctx.restore();
-    }
-  }
-}

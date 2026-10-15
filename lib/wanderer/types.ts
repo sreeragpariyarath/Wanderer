@@ -9,6 +9,8 @@ export interface Caption {
 
 export interface SceneCard {
   x: number;
+  y?: number;
+  revealRadius?: number;
   en: LocalizedCard;
 }
 

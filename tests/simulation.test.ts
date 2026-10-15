@@ -15,7 +15,7 @@ import {
   ParticleEmitter,
   updateParticles,
 } from '../lib/wanderer/particles';
-import { terrainHeight } from '../lib/wanderer/terrain';
+import { darknessAt, terrainHeight } from '../lib/wanderer/terrain';
 import { SceneSimulation } from '../lib/wanderer/simulation';
 import type { Particle, Puff } from '../lib/wanderer/types';
 import {
@@ -47,7 +47,10 @@ describe('character physics', () => {
   it.each([false, true])(
     'retains the bridge jump and produces one splash (run=%s)',
     (run) => {
-      const c = createCharacter();
+      const scene = createScene();
+      completeIntro(scene);
+      const c = scene.character;
+      const simulation = new SceneSimulation(scene, () => 0.5);
       placeCharacter(c, 8299);
       c.velocityX = run ? 420 : 170;
       const initialY = c.y;
@@ -55,17 +58,18 @@ describe('character physics', () => {
         splashes = 0,
         landings = 0;
       for (let i = 0; i < 180; i++) {
-        const x = c.x,
-          y = c.y;
-        const events = updateCharacter(c, { direction: 1, run }, STEP);
+        const events = simulation.update({ direction: 1, run }, STEP, {
+          width: 1280,
+          height: 800,
+        });
         if (c.mode === 'airborne' && c.y < initialY) airborne = true;
-        if (waterCrossing(x, y, c.x, c.y)) splashes++;
+        splashes += events.filter((event) => event.type === 'splash').length;
         landings += events.filter((e) => e.type === 'landing').length;
       }
       expect(airborne).toBe(true);
       expect(splashes).toBe(1);
-      expect(landings).toBe(1);
-      expect(c.mode).toBe('grounded');
+      expect(landings).toBe(0);
+      expect(c.mode).toBe('swimming');
     },
   );
   it('launches through ascent, apex and descent before landing on the island', () => {
@@ -200,6 +204,24 @@ describe('vehicle', () => {
   });
 });
 describe('river swimming', () => {
+  it('keeps the river and shore in daylight', () => {
+    for (const x of [8400, WORLD.wreckX, WORLD.waterEnd, 11000])
+      expect(darknessAt(x)).toBe(0);
+    expect(darknessAt(14500)).toBe(1);
+  });
+  it('can swim back into the river from the shore without walking on the bed', () => {
+    const scene = createScene();
+    completeIntro(scene);
+    placeCharacter(scene.character, WORLD.waterEnd + 2);
+    const simulation = new SceneSimulation(scene, () => 0.5);
+    for (let i = 0; i < 60; i++)
+      simulation.update({ direction: -1, run: false }, STEP, {
+        width: 1280,
+        height: 800,
+      });
+    expect(scene.character.mode).toBe('swimming');
+    expect(scene.character.x).toBeLessThan(WORLD.waterEnd);
+  });
   it('enters once, swims up and down, and climbs onto the far bank', () => {
     const scene = createScene();
     completeIntro(scene);
@@ -235,14 +257,14 @@ describe('river swimming', () => {
       );
     expect(scene.character.y).toBeGreaterThan(highY + 20);
 
-    for (let i = 0; i < 600 && scene.character.mode === 'swimming'; i++)
+    for (let i = 0; i < 1200 && scene.character.mode === 'swimming'; i++)
       simulation.update(
         { direction: 1, verticalDirection: 0, run: true },
         STEP,
         { width: 1280, height: 800 },
       );
     expect(scene.character.mode).toBe('grounded');
-    expect(scene.character.x).toBe(WORLD.waterEnd + 18);
+    expect(scene.character.x).toBe(WORLD.waterEnd + 20);
     expect(scene.character.velocityY).toBe(0);
   });
 });

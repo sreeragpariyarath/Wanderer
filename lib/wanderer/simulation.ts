@@ -1,5 +1,6 @@
 import { updateCamera } from './camera';
 import { updateCharacter, type Movement, type SceneEvent } from './character';
+import { WORLD } from './config';
 import { advanceIntro } from './loading';
 import { ParticleEmitter, emitSplash, updateParticles } from './particles';
 import type { RenderState, SceneState } from './state';
@@ -55,9 +56,17 @@ export class SceneSimulation {
         s.character.x,
         s.character.y,
       );
-      if (splash) {
+      const submerged =
+        s.character.mode !== 'swimming' &&
+        !s.vehicle.in &&
+        s.character.x > WORLD.bridgeEnd &&
+        s.character.x < WORLD.waterEnd &&
+        s.character.y >= WORLD.waterY;
+      if (splash || submerged) {
         enterWater(s.character);
-        events.push(splash);
+        events.push(
+          splash ?? { type: 'splash', x: s.character.x, y: WORLD.waterY },
+        );
       }
     }
     for (const event of events)
@@ -93,7 +102,8 @@ export class SceneSimulation {
     updateCamera(
       s.camera,
       s.character.x,
-      s.character.y,
+      s.character.y +
+        (s.character.mode === 'swimming' ? viewport.height * 0.16 : 0),
       s.character.mode === 'scripted-launch',
       dt,
     );

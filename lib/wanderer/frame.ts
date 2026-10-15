@@ -15,7 +15,6 @@ export interface Frame {
   D: number;
   N: number;
   nightA: number;
-  darkA: number;
 }
 export function createFrame(
   s: RenderState,
@@ -52,6 +51,5 @@ export function createFrame(
     N,
     SY: (wy) => baseY + wy - camY,
     nightA: Math.max(smoothStep(13900, 14400, X), N),
-    darkA: smoothStep(8360, 8600, X) * (1 - smoothStep(11000, 11600, X)),
   };
 }

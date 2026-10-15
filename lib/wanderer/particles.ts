@@ -21,37 +21,22 @@ export function emitSplash(
   event: SceneEvent,
   random: () => number,
 ): void {
-  for (let i = 0; i < 260; i++) {
+  for (let i = 0; i < 70; i++) {
     const big = random();
     parts.push({
       k: 'drop',
       x: event.x + (random() - 0.5) * 60,
       y: event.y + random() * 20,
-      vx: (random() - 0.5) * 520,
-      vy: -150 - Math.pow(random(), 0.6) * 720,
-      g: 160,
+      vx: (random() - 0.5) * 240,
+      vy: -60 - Math.pow(random(), 0.6) * 220,
+      g: 400,
       drag: 1.4,
-      life: 2.5 + random() * 2.5,
-      max: 5,
+      life: 0.6 + random() * 0.8,
+      max: 1.4,
       r: 1 + big * big * 4,
       c: ['#3d6fa8', '#5b8fc7', '#7fb3c9', '#86b0dc'][Math.floor(random() * 4)],
     });
   }
-  for (let i = 0; i < 110; i++)
-    parts.push({
-      k: 'rect',
-      x: event.x + (random() - 0.5) * 60,
-      y: event.y,
-      vx: (random() - 0.5) * 900,
-      vy: -250 - random() * 700,
-      g: 70,
-      drag: 1.6,
-      life: 3.5 + random() * 2.5,
-      max: 6,
-      rot: random() * 6,
-      vr: (random() - 0.5) * 4,
-      w: 5 + random() * 8,
-    });
   if (parts.length > PARTICLE_LIMIT)
     parts.splice(0, parts.length - PARTICLE_LIMIT);
 }

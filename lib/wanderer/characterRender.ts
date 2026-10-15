@@ -7,8 +7,11 @@ export function renderFigure(
   gy: number,
   C: RenderPalette,
 ): void {
-  const swimming = s.character.mode === 'swimming',
-    sitting = s.character.sitting,
+  if (s.character.mode === 'swimming') {
+    renderSwimmer(s, ctx, x, gy, C);
+    return;
+  }
+  const sitting = s.character.sitting,
     ph = s.character.gaitPhase,
     moving = Math.abs(s.character.velocityX) > 4 && s.character.velocityY === 0;
   const amp = moving ? Math.min(1.5, Math.abs(s.character.velocityX) / 170) : 0;
@@ -17,7 +20,7 @@ export function renderFigure(
   const bob = Math.abs(Math.sin(ph)) * 2 * amp;
   ctx.save();
   ctx.translate(x, gy);
-  ctx.rotate((swimming ? -0.62 : lean) * s.character.facing);
+  ctx.rotate(lean * s.character.facing);
   ctx.scale(s.character.facing, 1);
   ctx.strokeStyle = C.ink;
   ctx.lineWidth = 1.6;
@@ -27,7 +30,7 @@ export function renderFigure(
     hipY = -2 * Lg + 2 - bob + sitting * 30,
     neckY = hipY - 34,
     headY = neckY - 13;
-  const air = !swimming && s.character.velocityY !== 0;
+  const air = s.character.velocityY !== 0;
   const ik = (fx: number, fy: number) => {
     const dx = fx,
       dy = fy - hipY,
@@ -49,10 +52,7 @@ export function renderFigure(
       c = Math.cos(p);
     return [Math.sin(p) * stride, -(c > 0 ? c * 7 * amp : 0)];
   };
-  if (swimming) {
-    ik(-19 + Math.sin(ph) * 6, hipY + 13);
-    ik(-21 + Math.sin(ph + Math.PI) * 6, hipY + 25);
-  } else if (sitting > 0.5) {
+  if (sitting > 0.5) {
     ik(24, 0);
     ik(28, 0);
   } else if (air) {
@@ -84,10 +84,7 @@ export function renderFigure(
     ctx.lineTo(ex + Math.sin(a + 0.4) * 12, ey + Math.cos(a + 0.4) * 12);
     ctx.stroke();
   };
-  if (swimming) {
-    arm(1.5 + Math.sin(ph) * 0.7);
-    arm(-1.5 + Math.sin(ph + Math.PI) * 0.7);
-  } else if (sitting > 0.5) {
+  if (sitting > 0.5) {
     ctx.beginPath();
     ctx.moveTo(0, neckY + 4);
     ctx.lineTo(10, neckY + 16);
@@ -139,5 +136,86 @@ export function renderFigure(
   ctx.arc(4, headY + 1, 0.9, 0, 7);
   ctx.fillStyle = C.ink;
   ctx.fill();
+  ctx.restore();
+}
+
+/** The swimmer is drawn around the torso, horizontally, rather than rotating
+ * the walking pose around its feet. Facing mirrors the complete stroke. */
+function renderSwimmer(
+  s: Pick<RenderState, 'accent' | 'character' | 'time'>,
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  palette: RenderPalette,
+): void {
+  const phase = s.character.gaitPhase;
+  const stroke = Math.sin(phase);
+  const pitch = Math.max(-0.3, Math.min(0.3, s.character.velocityY / 360));
+  ctx.save();
+  ctx.translate(x, y - 28);
+  ctx.scale(s.character.facing, 1);
+  ctx.rotate(pitch);
+  ctx.strokeStyle = palette.ink;
+  ctx.lineWidth = 1.7;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  const limb = (points: ReadonlyArray<readonly [number, number]>) => {
+    ctx.beginPath();
+    points.forEach(([px, py], index) =>
+      index === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py),
+    );
+    ctx.stroke();
+  };
+  // Alternating long flutter kicks trail behind the torso.
+  limb([
+    [-16, 1],
+    [-35, -3 + stroke * 6],
+    [-54, -3 + stroke * 10],
+    [-59, -6 + stroke * 10],
+  ]);
+  limb([
+    [-16, 5],
+    [-35, 8 - stroke * 6],
+    [-53, 8 - stroke * 10],
+    [-58, 5 - stroke * 10],
+  ]);
+  ctx.beginPath();
+  ctx.moveTo(14, -5);
+  ctx.quadraticCurveTo(-2, -10, -18, -4);
+  ctx.lineTo(-18, 7);
+  ctx.quadraticCurveTo(-2, 10, 14, 4);
+  ctx.stroke();
+  // One arm reaches ahead while the other pulls beneath the body.
+  limb([
+    [10, -3],
+    [26 + stroke * 10, -10 - stroke * 5],
+    [44 + stroke * 11, -5 - stroke * 9],
+  ]);
+  limb([
+    [10, 4],
+    [9 - stroke * 16, 17 + stroke * 5],
+    [-12 - stroke * 18, 11 + stroke * 7],
+  ]);
+  ctx.beginPath();
+  ctx.arc(27, -1, 9, 0, Math.PI * 2);
+  ctx.stroke();
+  limb([
+    [22, -10],
+    [31, -11],
+    [40, -4],
+  ]);
+  ctx.fillStyle = palette.ink;
+  ctx.beginPath();
+  ctx.arc(32, -1, 1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = s.accent;
+  limb([
+    [15, -6],
+    [15, 5],
+  ]);
+  ctx.beginPath();
+  ctx.moveTo(14, 1);
+  ctx.quadraticCurveTo(-4, 15 + stroke * 3, -26, 9 + stroke * 4);
+  ctx.stroke();
   ctx.restore();
 }

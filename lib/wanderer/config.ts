@@ -6,7 +6,8 @@ export const WORLD = {
   bridgeEnd: 8300,
   waterY: 75,
   waterStart: 8250,
-  waterEnd: 9100,
+  waterEnd: 10300,
+  wreckX: 9300,
   launchX: 13800,
   islandStart: 13950,
   roadStart: 450,
@@ -26,4 +27,6 @@ export const PARTICLE_LIMIT = 1200;
 // Stable, walkable section starts used when restoring a journey. Progress is
 // saved at these points so a refresh never places the character inside a
 // transition, jump, or other scripted moment.
-export const CHECKPOINTS = [120, 3500, 6680, 8200, 9120, 11800, 14000] as const;
+export const CHECKPOINTS = [
+  120, 3500, 6680, 8200, 10320, 11800, 14000,
+] as const;

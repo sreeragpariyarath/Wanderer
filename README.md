@@ -14,6 +14,7 @@ Open http://localhost:3000. Production: `npm run build`, then `npm start`.
 ## Controls and saved journeys
 
 - A / Left Arrow and D / Right Arrow move; Shift runs or accelerates. In the river, W / Up Arrow and S / Down Arrow control swimming depth.
+- Swim through the open river to discover a wrecked wooden boat and its story card, then continue to the shallow shore and the village beyond.
 - Space enters/exits a nearby car or opens a story card. Hold movement controls to drive. Exiting is disabled above the safe speed.
 - On-screen A, D, W, S, and Shift controls support simultaneous touch input when their actions are available. The contextual button provides car and card actions without a keyboard.
 - Story cards have their own Read and Close buttons. The header control toggles sound.

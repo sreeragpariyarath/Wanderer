@@ -13,39 +13,14 @@ import { renderTrees } from './trees';
 import { renderCar } from './vehicleRender';
 import { renderVillage } from './village';
 import { renderWater, renderWaterOverlay } from './water';
-import {
-  renderFlakes,
-  renderRain,
-  renderSky,
-  renderStars,
-} from './weatherRender';
+import { renderRain, renderSky, renderStars } from './weatherRender';
 export function renderEnvironment(s: RenderState, frame: Frame): void {
-  const { ctx, cam, SY, w, h, col, X, nightA, darkA } = frame;
+  const { ctx, cam, SY, w, h, col, X, nightA } = frame;
   renderClouds(s, frame);
   renderSky(s, frame);
   renderMountains(s, frame);
   renderCity(s, ctx, cam, SY, w, col);
   renderStars(s, frame);
-  // dark zone circuit rows
-  if (darkA > 0)
-    for (const row of s.rows) {
-      const ry = SY(row.y);
-      ctx.fillStyle = s.particleColors[row.ci];
-      for (
-        let wx = Math.max(8500, Math.floor(cam / 14) * 14);
-        wx < Math.min(11200, cam + w);
-        wx += 14
-      ) {
-        const i = wx / 14,
-          seg = seededRandom(Math.floor(i / 10) + row.ph);
-        if (seg < 0.3 || seededRandom(i + row.ph) < 0.3) continue;
-        const sx = wx - cam;
-        ctx.globalAlpha =
-          darkA * (0.35 + 0.45 * Math.abs(Math.sin(s.time * 1.5 + i * 0.3)));
-        const r = 2.5 + seededRandom(i * 7 + row.ph) * 2;
-        ctx.fillRect(sx, ry, r, r);
-      }
-    }
   renderTrees(s, frame);
   // seeds
   for (const seed of s.seeds) {
@@ -103,7 +78,6 @@ export function renderEnvironment(s: RenderState, frame: Frame): void {
   ctx.globalAlpha = 1;
 
   renderGround(s, frame);
-  renderFlakes(s, frame);
   renderParticleRender(s, frame);
   // captions
   for (const c of s.captions) {

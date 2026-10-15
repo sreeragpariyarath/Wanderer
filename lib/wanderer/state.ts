@@ -63,9 +63,7 @@ export class SceneState {
   clouds: Array<{ x: number; y: number; pts: CloudPoint[] }> = [];
   seeds: Array<{ x: number; off: number; sp: number }> = [];
   rain: Array<{ x: number; y: number; sp: number }> = [];
-  flakes: Array<{ x: number; y: number; sp: number; rot: number }> = [];
   stars: Array<{ x: number; y: number; s: number }> = [];
-  rows: Array<{ y: number; ci: number; ph: number }> = [];
   villageColors: string[] = [];
   houses: House[] = [];
   ridges: [number, number][][] = [];

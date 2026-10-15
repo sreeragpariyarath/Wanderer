@@ -104,21 +104,10 @@ export function createScene(): SceneState {
     y: seededRandom(i + 400),
     sp: 0.5 + seededRandom(i + 500),
   }));
-  s.flakes = Array.from({ length: 55 }, (_, i) => ({
-    x: seededRandom(i + 600),
-    y: seededRandom(i + 700),
-    sp: 0.3 + seededRandom(i + 800) * 0.6,
-    rot: seededRandom(i + 900) * 6,
-  }));
   s.stars = Array.from({ length: 160 }, (_, i) => ({
     x: seededRandom(i + 1000),
     y: seededRandom(i + 1100),
     s: seededRandom(i + 1200),
-  }));
-  s.rows = Array.from({ length: 8 }, (_, k) => ({
-    y: 220 - k * 46,
-    ci: k % 4,
-    ph: seededRandom(k + 40) * 100,
   }));
   s.villageColors = ['#5f8fa0', '#c0725e', '#9a9a9a', '#d9a35b', '#7fa9a0'];
   s.houses = [

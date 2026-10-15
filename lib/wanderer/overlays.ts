@@ -28,7 +28,7 @@ export function positionOverlays(
   const card = elements.card,
     data = s.cards[cardIndex];
   if (card && data) {
-    card.style.transform = `translate(${clamp(data.x - cam + 80, w - card.offsetWidth - 16)}px, ${clamp(SY(terrainHeight(s.character.x, data.x)) - card.offsetHeight - 120, h - card.offsetHeight - 100)}px)`;
+    card.style.transform = `translate(${clamp(data.x - cam + 80, w - card.offsetWidth - 16)}px, ${clamp(SY(data.y ?? terrainHeight(s.character.x, data.x)) - card.offsetHeight - 120, h - card.offsetHeight - 100)}px)`;
     card.style.opacity = String(s.cardOpacity);
   }
   const prompt = elements.prompt;
