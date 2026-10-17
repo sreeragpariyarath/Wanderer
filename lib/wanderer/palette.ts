@@ -13,8 +13,8 @@ function rgb(str: string): RGB {
   return [d[0], d[1], d[2]];
 }
 
-export function initializePalette(s: SceneState): void {
-  const cs = getComputedStyle(document.documentElement),
+export function initializePalette(s: SceneState, element: Element): void {
+  const cs = getComputedStyle(element),
     v = (name: string, fallback: string) =>
       cs.getPropertyValue(name).trim() || fallback;
   const n9 = rgb(v('--color-neutral-900', '#201f1d'));

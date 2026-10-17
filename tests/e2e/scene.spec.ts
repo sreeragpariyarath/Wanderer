@@ -8,6 +8,31 @@ async function start(page: Page, checkpoint?: string) {
       .getByRole('button', { name: checkpoint })
       .click();
 }
+test('local typeface reaches both DOM and canvas rendering', async ({
+  page,
+}) => {
+  await start(page);
+  const typography = await page.evaluate(async () => {
+    await document.fonts.ready;
+    const rootStyle = getComputedStyle(document.documentElement);
+    const localFamily = rootStyle
+      .getPropertyValue('--font-volkswagen-serial')
+      .trim();
+    const canvas = document.querySelector('canvas');
+    return {
+      localFamily,
+      bodyFont: getComputedStyle(document.body).fontFamily,
+      canvasFont: canvas?.getContext('2d')?.font ?? '',
+    };
+  });
+  const primaryFamily = typography.localFamily
+    .split(',')[0]
+    ?.replaceAll(/["']/g, '')
+    .trim();
+  expect(primaryFamily).toBeTruthy();
+  expect(typography.bodyFont).toContain(primaryFamily);
+  expect(typography.canvasFont).toContain(primaryFamily);
+});
 test('every visit starts from the beginning with sound off', async ({
   page,
 }) => {

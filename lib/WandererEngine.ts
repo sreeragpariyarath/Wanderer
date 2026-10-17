@@ -72,7 +72,7 @@ export default class WandererEngine {
       return;
     }
     const s = this.scene;
-    initializePalette(s);
+    initializePalette(s, canvas);
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     s.reducedMotion = reduced.matches;
     if (s.reducedMotion) completeIntro(s);
