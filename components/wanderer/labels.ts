@@ -1,6 +1,7 @@
 export function labels() {
   return {
     scene: 'Walk through a dotted world',
+    checkpoints: 'Checkpoints',
     back: 'back',
     forward: 'forward',
     run: 'run',

@@ -3,9 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import WandererEngine from '../lib/WandererEngine';
 import { SceneAudio } from '../lib/wanderer/audio';
 import { placeCharacter } from '../lib/wanderer/character';
+import { CHECKPOINTS } from '../lib/wanderer/checkpoints';
 import { createScene } from '../lib/wanderer/initialize';
 import { completeIntro } from '../lib/wanderer/loading';
-import { SAVE_KEY, captureJourney } from '../lib/wanderer/persistence';
 import { SceneRenderer } from '../lib/wanderer/renderer';
 
 let callbacks: Map<number, FrameRequestCallback>, next: number;
@@ -81,6 +81,7 @@ describe('lifecycle and browser boundary', () => {
     expect(callbacks.size).toBe(0);
     engine.dispose();
     engine.start(canvas, overlays);
+    engine.skipIntro();
     expect(callbacks.size).toBe(1);
     window.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'd', code: 'KeyD' }),
@@ -107,36 +108,40 @@ describe('lifecycle and browser boundary', () => {
     document.dispatchEvent(new Event('visibilitychange'));
     expect(callbacks.size).toBe(0);
     expect(engine.getSnapshot().direction).toBe(0);
-    const before = JSON.parse(localStorage.getItem(SAVE_KEY)!).x;
     Object.defineProperty(document, 'hidden', {
       value: false,
       configurable: true,
     });
     document.dispatchEvent(new Event('visibilitychange'));
     tick(60000);
-    window.dispatchEvent(new Event('pagehide'));
-    expect(JSON.parse(localStorage.getItem(SAVE_KEY)!).x).toBe(before);
     engine.dispose();
   });
-  it('restores a seated car stopped, without creating audio', () => {
-    const scene = createScene();
-    placeCharacter(scene.character, 760);
-    scene.vehicle = { ...scene.vehicle, x: 2000, in: true, started: true };
-    localStorage.setItem(
-      SAVE_KEY,
-      JSON.stringify(captureJourney(scene.character, scene.vehicle, true)),
-    );
-    const audio = vi.fn();
-    vi.stubGlobal('AudioContext', audio);
+  it('starts every visit from the beginning, ignoring stored data', () => {
+    localStorage.setItem('wanderer-save-v1', JSON.stringify({ x: 5100 }));
     const engine = new WandererEngine(),
       { canvas, overlays } = mount();
     engine.start(canvas, overlays);
     expect(engine.getSnapshot()).toMatchObject({
-      ready: true,
-      sound: true,
-      carPrompt: 'exit',
+      ready: false,
+      sound: false,
+      checkpoint: 0,
     });
-    expect(audio).not.toHaveBeenCalled();
+    engine.dispose();
+  });
+  it('jumps to any checkpoint and ignores invalid or early requests', () => {
+    const engine = new WandererEngine(),
+      { canvas, overlays } = mount();
+    engine.start(canvas, overlays);
+    engine.goToCheckpoint(3);
+    expect(engine.getSnapshot().checkpoint).toBe(0);
+    engine.skipIntro();
+    engine.goToCheckpoint(CHECKPOINTS.length);
+    expect(engine.getSnapshot().checkpoint).toBe(0);
+    engine.hold(1, 'right');
+    engine.goToCheckpoint(4);
+    expect(engine.getSnapshot()).toMatchObject({ checkpoint: 4, direction: 0 });
+    engine.goToCheckpoint(0);
+    expect(engine.getSnapshot().checkpoint).toBe(0);
     engine.dispose();
   });
   it('handles missing canvas and zero dimensions', () => {
@@ -150,18 +155,11 @@ describe('lifecycle and browser boundary', () => {
     expect(new SceneRenderer().render(createScene(), canvas)).toBeNull();
   });
   it('does not intercept Space on a focused button; ignores repeat interactions', () => {
-    const scene = createScene();
-    placeCharacter(scene.character, 5100);
-    localStorage.setItem(
-      SAVE_KEY,
-      JSON.stringify({
-        ...captureJourney(scene.character, scene.vehicle, false),
-        x: 5100,
-      }),
-    );
     const engine = new WandererEngine(),
       { canvas, overlays } = mount();
     engine.start(canvas, overlays);
+    engine.skipIntro();
+    engine.goToCheckpoint(4);
     const repeat = new KeyboardEvent('keydown', {
       key: ' ',
       repeat: true,

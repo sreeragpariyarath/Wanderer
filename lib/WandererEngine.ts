@@ -1,22 +1,17 @@
 import { SceneAudio } from './wanderer/audio';
 import { bindKeyboard } from './wanderer/browserInput';
 import { placeCharacter, type SceneEvent } from './wanderer/character';
+import { CHECKPOINTS } from './wanderer/checkpoints';
 import { FixedClock } from './wanderer/clock';
 import { createScene } from './wanderer/initialize';
 import { InputState, type HeldAction } from './wanderer/input';
 import { completeIntro } from './wanderer/loading';
 import { positionOverlays, type OverlayElements } from './wanderer/overlays';
 import { initializePalette } from './wanderer/palette';
-import {
-  JourneyWriter,
-  captureJourney,
-  readJourney,
-} from './wanderer/persistence';
 import { SceneRenderer } from './wanderer/renderer';
 import { SceneSimulation } from './wanderer/simulation';
 import type { SceneState } from './wanderer/state';
-import { terrainHeight } from './wanderer/terrain';
-import { interactVehicle } from './wanderer/vehicle';
+import { exitVehicle, interactVehicle } from './wanderer/vehicle';
 import { INITIAL_VIEW, deriveView, type ViewModel } from './wanderer/viewModel';
 
 export default class WandererEngine {
@@ -28,7 +23,6 @@ export default class WandererEngine {
   private audio: SceneAudio | null = null;
   private renderer: SceneRenderer | null = null;
   private simulation: SceneSimulation | null = null;
-  private writer: JourneyWriter | null = null;
   private raf = 0;
   private running = false;
   private cleanups: Array<() => void> = [];
@@ -79,28 +73,6 @@ export default class WandererEngine {
     }
     const s = this.scene;
     initializePalette(s);
-    try {
-      const storage = window.localStorage;
-      this.writer = new JourneyWriter(storage);
-      const save = readJourney(storage);
-      if (save) {
-        completeIntro(s);
-        placeCharacter(s.character, save.x);
-        Object.assign(s.vehicle, save.vehicle, {
-          v: 0,
-          endT: 0,
-          startX: save.vehicle.x,
-        });
-        if (save.vehicle.in) {
-          s.character.mode = 'seated';
-          s.character.x = s.vehicle.x;
-          s.character.y = terrainHeight(s.vehicle.x, s.vehicle.x);
-        }
-        this.publish({ ...this.view, sound: save.sound });
-      }
-    } catch {
-      this.writer = null;
-    }
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     s.reducedMotion = reduced.matches;
     if (s.reducedMotion) completeIntro(s);
@@ -127,15 +99,12 @@ export default class WandererEngine {
       this.simulation?.resetInterpolation();
       this.sync();
       cancelAnimationFrame(this.raf);
-      if (document.hidden) this.flush();
-      else if (this.running) this.raf = requestAnimationFrame(this.frame);
+      if (!document.hidden && this.running)
+        this.raf = requestAnimationFrame(this.frame);
     };
-    const hide = () => this.flush();
     document.addEventListener('visibilitychange', visibility);
-    window.addEventListener('pagehide', hide);
-    this.cleanups.push(
-      () => document.removeEventListener('visibilitychange', visibility),
-      () => window.removeEventListener('pagehide', hide),
+    this.cleanups.push(() =>
+      document.removeEventListener('visibilitychange', visibility),
     );
     this.sync();
     if (!document.hidden) this.raf = requestAnimationFrame(this.frame);
@@ -159,7 +128,6 @@ export default class WandererEngine {
       this.input.clear();
     this.handleEvents(events);
     this.sync();
-    this.save(dt);
   }
   private handleEvents(events: SceneEvent[]): void {
     for (const event of events) {
@@ -180,7 +148,19 @@ export default class WandererEngine {
     this.simulation?.resetInterpolation();
     this.clock.reset();
     this.sync();
-    this.flush();
+  };
+  readonly goToCheckpoint = (index: number): void => {
+    const s = this.scene,
+      checkpoint = CHECKPOINTS[index];
+    if (!s?.introDone || !checkpoint) return;
+    if (s.vehicle.in) exitVehicle(s.vehicle, s.character);
+    placeCharacter(s.character, checkpoint.x);
+    this.input.clear();
+    s.camera = { x: s.character.x, y: s.character.y };
+    this.simulation?.resetInterpolation();
+    this.clock.reset();
+    this.publish({ ...this.view, expanded: false });
+    this.sync();
   };
   readonly interact = (): void => {
     const s = this.scene;
@@ -211,19 +191,8 @@ export default class WandererEngine {
     this.input.release(`pointer:${pointerId}`);
     this.sync();
   };
-  private save(dt = 0, flush = false): void {
-    const s = this.scene;
-    if (s?.introDone)
-      this.writer?.write(
-        captureJourney(s.character, s.vehicle, this.view.sound),
-        dt,
-        flush,
-      );
-  }
-  private flush = (): void => this.save(0, true);
   dispose(): void {
     if (!this.running) return;
-    this.flush();
     this.running = false;
     cancelAnimationFrame(this.raf);
     this.cleanups.splice(0).forEach((clean) => clean());
@@ -233,7 +202,6 @@ export default class WandererEngine {
     this.renderer?.dispose();
     this.audio = null;
     this.renderer = null;
-    this.writer = null;
     this.scene = null;
     this.simulation = null;
     this.canvas = null;

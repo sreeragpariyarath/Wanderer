@@ -1,4 +1,5 @@
 import type { Movement } from './character';
+import { checkpointIndex } from './checkpoints';
 import type { SceneState } from './state';
 import { canEnterVehicle } from './vehicle';
 export interface ViewModel {
@@ -12,6 +13,7 @@ export interface ViewModel {
   cardIndex: number;
   cardVisible: boolean;
   expanded: boolean;
+  checkpoint: number;
   carPrompt: 'enter' | 'drive' | 'exit' | null;
   action: 'enter' | 'exit' | 'card' | null;
   error: boolean;
@@ -27,6 +29,7 @@ export const INITIAL_VIEW: ViewModel = {
   cardIndex: -1,
   cardVisible: false,
   expanded: false,
+  checkpoint: 0,
   carPrompt: null,
   action: null,
   error: false,
@@ -78,6 +81,7 @@ export function deriveView(
       cardVisible && cardIndex === previous.cardIndex
         ? previous.expanded
         : false,
+    checkpoint: checkpointIndex(s.character.safeX),
     carPrompt,
     action: s.vehicle.in
       ? 'exit'

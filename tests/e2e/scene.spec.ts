@@ -1,81 +1,57 @@
 import { expect, test, type Page } from '@playwright/test';
-const key = 'wanderer-save-v1';
-async function seed(
-  page: Page,
-  x: number,
-  vehicle = { x: 760, in: false, started: false, arrived: false },
-) {
-  await page.addInitScript(
-    ({ key, x, vehicle }) => {
-      if (!sessionStorage.getItem('seeded')) {
-        localStorage.clear();
-        localStorage.setItem(
-          key,
-          JSON.stringify({
-            version: 1,
-            x,
-            lang: 'en',
-            sound: false,
-            introComplete: true,
-            vehicle,
-          }),
-        );
-        sessionStorage.setItem('seeded', '1');
-      }
-    },
-    { key, x, vehicle },
-  );
+async function start(page: Page, checkpoint?: string) {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Skip introduction' }).click();
+  if (checkpoint)
+    await page
+      .getByRole('navigation', { name: 'Checkpoints' })
+      .getByRole('button', { name: checkpoint })
+      .click();
 }
-async function progress(page: Page) {
-  return page.evaluate(
-    (key) => JSON.parse(localStorage.getItem(key) ?? 'null'),
-    key,
-  );
-}
-async function flush(page: Page) {
-  await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
-}
-test('first visit skips immediately, uses English and restores sound preferences', async ({
+test('every visit starts from the beginning with sound off', async ({
   page,
 }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Skip introduction' }).click();
-  await expect(
-    page.getByRole('button', { name: 'forward', exact: true }),
-  ).toBeVisible();
+  await start(page, 'Shore');
   await expect(page.getByRole('group', { name: 'Language' })).toHaveCount(0);
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await page.getByRole('button', { name: 'Enable sound' }).click();
-  await flush(page);
   await page.reload();
-  await expect(
-    page.getByRole('button', { name: 'Mute sound' }),
-  ).toHaveAttribute('aria-pressed', 'true');
   await expect(
     page.getByRole('button', { name: 'Skip introduction' }),
-  ).toBeHidden();
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Skip introduction' }).click();
+  await expect(
+    page.getByRole('button', { name: 'Enable sound' }),
+  ).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.getByRole('button', { name: 'City' })).toHaveAttribute(
+    'aria-current',
+    'location',
+  );
+  expect(await page.evaluate(() => localStorage.length)).toBe(0);
   expect(errors).toEqual([]);
 });
-test('refresh restores the latest reached section checkpoint', async ({
+test('checkpoint bar jumps to a section and tracks the current one', async ({
   page,
 }) => {
-  await seed(page, 5100);
-  await page.goto('/');
-  await expect
-    .poll(() => progress(page), { timeout: 3000 })
-    .toMatchObject({ x: 3500 });
-  await page.reload();
-  await expect.poll(() => progress(page)).toMatchObject({ x: 3500 });
+  await start(page);
+  const bar = page.getByRole('navigation', { name: 'Checkpoints' });
+  await expect(bar.getByRole('button')).toHaveCount(7);
+  for (const name of ['Forest', 'Island', 'City']) {
+    await bar.getByRole('button', { name }).click();
+    await expect(bar.getByRole('button', { name })).toHaveAttribute(
+      'aria-current',
+      'location',
+    );
+  }
 });
 test('river exposes vertical swim controls and reaches the far bank', async ({
   page,
 }, info) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await seed(page, 8200);
-  await page.goto('/');
+  await start(page, 'River');
   await page.locator('canvas').click({ position: { x: 20, y: 20 } });
   await page.keyboard.down('d');
   const swimUp = page.getByRole('button', { name: 'swim up' });
@@ -115,8 +91,7 @@ test('river exposes vertical swim controls and reaches the far bank', async ({
 test('story opens with pointer and keyboard; repeat does not toggle; stays within viewport', async ({
   page,
 }) => {
-  await seed(page, 5100);
-  await page.goto('/');
+  await start(page, 'Shore');
   const card = page.locator('.story-card');
   await card.getByRole('button', { name: /Read story/ }).click();
   await expect(card.getByRole('button', { name: 'Close' })).toBeVisible();
@@ -142,34 +117,34 @@ test('story opens with pointer and keyboard; repeat does not toggle; stays withi
     .toBe(true);
   await expect(card).toHaveCSS('overflow', 'auto');
 });
-test('vehicle entry, fast exit restriction, stopped restore and touch exit', async ({
+test('vehicle entry, fast exit restriction and checkpoint exit', async ({
   page,
 }) => {
-  await seed(page, 760);
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Get in the car' }).click();
+  await start(page);
   await page.locator('canvas').click({ position: { x: 20, y: 20 } });
+  await page.keyboard.down('Shift');
+  await page.keyboard.down('d');
+  await page
+    .getByRole('button', { name: 'Get in the car' })
+    .waitFor({ state: 'visible', timeout: 10000 });
+  await page.keyboard.up('d');
+  await page.keyboard.up('Shift');
+  await page.getByRole('button', { name: 'Get in the car' }).click();
   await page.keyboard.down('d');
   await page.waitForTimeout(800);
   await expect(
     page.getByRole('button', { name: 'Get out of the car' }),
   ).toBeDisabled();
-  await flush(page);
-  expect((await progress(page)).vehicle.in).toBe(true);
   await page.keyboard.up('d');
-  await page.reload();
+  await page.getByRole('button', { name: 'Forest' }).click();
   await expect(
     page.getByRole('button', { name: 'Get out of the car' }),
-  ).toBeEnabled();
-  await page.getByRole('button', { name: 'Get out of the car' }).click();
-  await flush(page);
-  expect((await progress(page)).vehicle.in).toBe(false);
+  ).toBeHidden();
 });
 test('pointer capture survives dragging and cancellation releases movement', async ({
   page,
 }) => {
-  await seed(page, 1000);
-  await page.goto('/');
+  await start(page);
   const forward = page.getByRole('button', { name: 'forward', exact: true }),
     box = await forward.boundingBox();
   expect(box).not.toBeNull();
@@ -185,8 +160,7 @@ test('pointer capture survives dragging and cancellation releases movement', asy
 test('blur clears held inputs and native focused buttons retain Space', async ({
   page,
 }) => {
-  await seed(page, 1000);
-  await page.goto('/');
+  await start(page);
   await page.keyboard.down('d');
   await expect(
     page.getByRole('button', { name: 'forward', exact: true }),
@@ -236,8 +210,7 @@ test('representative scene renders and resizes without errors', async ({
 }, info) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  await seed(page, 7550);
-  await page.goto('/');
+  await start(page, 'Bridge');
   await page.waitForTimeout(300);
   await page.screenshot({ path: info.outputPath('bridge.png') });
   await page.setViewportSize({ width: 800, height: 360 });
@@ -246,7 +219,7 @@ test('representative scene renders and resizes without errors', async ({
   expect(errors).toEqual([]);
 });
 
-test('normal introduction completes without input and is not replayed', async ({
+test('normal introduction completes without input and replays on reload', async ({
   page,
 }) => {
   await page.goto('/');
@@ -256,9 +229,8 @@ test('normal introduction completes without input and is not replayed', async ({
   await expect(
     page.getByRole('button', { name: 'forward', exact: true }),
   ).toBeVisible({ timeout: 18000 });
-  await flush(page);
   await page.reload();
   await expect(
     page.getByRole('button', { name: 'Skip introduction' }),
-  ).toBeHidden();
+  ).toBeVisible();
 });

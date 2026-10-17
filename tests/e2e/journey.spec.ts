@@ -57,32 +57,19 @@ test('full journey reaches the island using real controls', async ({
   ).toBeVisible();
   await page.keyboard.down('Shift');
   await page.keyboard.down('d');
-  await expect
-    .poll(
-      async () =>
-        page.evaluate(
-          () =>
-            JSON.parse(localStorage.getItem('wanderer-save-v1') ?? '{}').vehicle
-              ?.arrived,
-        ),
-      { timeout: 25000 },
-    )
-    .toBe(true);
+  await expect(
+    page.getByRole('button', { name: 'Get out of the car' }),
+  ).toBeHidden({ timeout: 25000 });
   await page.keyboard.up('d');
   await page.keyboard.up('Shift');
   await page.waitForTimeout(750);
   await page.keyboard.down('Shift');
   await page.keyboard.down('d');
-  await expect
-    .poll(
-      async () =>
-        page.evaluate(
-          () =>
-            JSON.parse(localStorage.getItem('wanderer-save-v1') ?? '{}').x ?? 0,
-        ),
-      { timeout: 65000 },
-    )
-    .toBeGreaterThanOrEqual(14000);
+  await expect(page.getByRole('button', { name: 'Island' })).toHaveAttribute(
+    'aria-current',
+    'location',
+    { timeout: 65000 },
+  );
   await page.keyboard.up('d');
   await page.keyboard.up('Shift');
   await page.screenshot({ path: info.outputPath('island-finish.png') });

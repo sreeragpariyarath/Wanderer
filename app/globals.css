@@ -660,10 +660,40 @@ a:hover {
   letter-spacing: 0.14em;
   color: var(--color-neutral-500);
 }
+.checkpoint-bar {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  z-index: 4;
+}
+.checkpoint-bar button {
+  min-height: 30px;
+  padding: 4px 12px;
+  border: 1px solid var(--color-divider);
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--color-bg) 85%, transparent);
+  font: 12px var(--font-body);
+  letter-spacing: 0.04em;
+  color: var(--color-neutral-500);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.checkpoint-bar button[aria-current='location'] {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
 .movement-controls {
   position: absolute;
   left: 50%;
-  bottom: 9%;
+  bottom: max(9%, 64px);
   transform: translateX(-50%);
   display: flex;
   flex-wrap: wrap;
@@ -717,7 +747,10 @@ a:hover {
 @media (max-width: 540px) {
   .movement-controls {
     gap: 8px;
-    bottom: 6%;
+    bottom: max(6%, 96px);
+  }
+  .checkpoint-bar button {
+    padding: 4px 9px;
   }
   .movement-controls > span:not(.control-divider) {
     display: none;

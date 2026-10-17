@@ -1,6 +1,7 @@
 'use client';
 import WandererEngine from '@/lib/WandererEngine';
 import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { CheckpointBar } from './wanderer/CheckpointBar';
 import { HeaderSettings } from './wanderer/HeaderSettings';
 import { LoadingOverlay } from './wanderer/LoadingOverlay';
 import { MovementControls } from './wanderer/MovementControls';
@@ -59,6 +60,7 @@ export default function Wanderer() {
       </div>
       <LoadingOverlay view={view} skip={engine.skipIntro} />
       <HeaderSettings view={view} toggleSound={engine.toggleSound} />
+      <CheckpointBar view={view} goTo={engine.goToCheckpoint} />
       <MovementControls
         view={view}
         hold={engine.hold}

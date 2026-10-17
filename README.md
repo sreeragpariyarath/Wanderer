@@ -19,7 +19,7 @@ Open http://localhost:3000. Production: `npm run build`, then `npm start`.
 - On-screen A, D, W, S, and Shift controls support simultaneous touch input when their actions are available. The contextual button provides car and card actions without a keyboard.
 - Story cards have their own Read and Close buttons. The header control toggles sound.
 - The introduction plays on a first visit and can be skipped immediately. Returning visits resume directly. Reduced-motion preference also skips it and freezes decorative animation.
-- Versioned local saves restore the latest safe section checkpoint, car progress, and sound preference. River and scripted-jump positions normalize to a nearby safe checkpoint. Older Japanese preferences fall back to English. A saved driver resumes stopped in the car. Sound waits for a user gesture.
+- Nothing is stored in the browser: every visit starts at the beginning (the introduction can be skipped). A checkpoint bar along the bottom (City, Forest, Bridge, River, Shore, Village, Island) highlights the current section and jumps straight to any other, leaving the car if driving. Sound starts off and waits for a user gesture.
 - The old `wanderer-x2` position is migrated only after the new save is written successfully. Invalid/unavailable storage falls back to a fresh journey.
 
 ## Architecture
@@ -37,7 +37,7 @@ Open http://localhost:3000. Production: `npm run build`, then `npm start`.
 | `weather`, `weatherRender`, `particles`                                 | Weather transitions, bounded effects, injected randomness            |
 | `characterRender`, `vehicleRender`, `renderEnvironment`, `renderer`     | Read-only drawing and browser canvas resources                       |
 | `viewModel`, `overlays`                                                 | Stable UI snapshots and the sole animated DOM-style adapter          |
-| `persistence`, `audio`                                                  | Validated optional storage and gesture-unlocked sound                |
+| `checkpoints`, `audio`                                                  | Named section checkpoints and gesture-unlocked sound                 |
 | `config`, `state`, `types`, `sceneData`, `initialize`                   | Tuning constants, state contracts, story copy, deterministic scenery |
 
 The engine runs 60 simulation steps per second and interpolates character, vehicle, and camera positions for rendering. Catch-up is capped at five steps. Hidden tabs pause and clear inputs, with elapsed time reset on return. Renderers receive deeply readonly scene views and never update simulation data. Canvas cache resources belong to the renderer and are released on disposal.
@@ -58,6 +58,6 @@ npm run build
 
 Unit tests cover physics, input sources, timing, lifecycle, storage, and render purity. Browser tests run in desktop Chromium and a touch-enabled mobile viewport. Their server uses port 3001. Deterministic starting positions are seeded through browser storage in test code; there is no production scene-positioning endpoint or debug global.
 
-Manual regression checks: normal/skip intro, walk/run/backtrack, bridge jump, underwater W/S swimming and both river exits, island landing, car entry/exit/arrival, pointer cancellation, multi-touch movement, hidden-tab resume, sound, checkpoint restoration, short-screen story scrolling, resize and orientation changes. Compare representative intro/city/forest/bridge/river/village/island screenshots when changing artwork.
+Manual regression checks: normal/skip intro, walk/run/backtrack, bridge jump, underwater W/S swimming and both river exits, island landing, car entry/exit/arrival, pointer cancellation, multi-touch movement, hidden-tab resume, sound, checkpoint bar jumps, short-screen story scrolling, resize and orientation changes. Compare representative intro/city/forest/bridge/river/village/island screenshots when changing artwork.
 
 Use `npm run format` to apply the repository formatter. Generated browser reports, screenshots, and local review artifacts are ignored by Git.
