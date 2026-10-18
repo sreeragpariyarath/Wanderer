@@ -3,6 +3,7 @@ export const WORLD = {
   minX: 30,
   maxX: 15940,
   startX: 70,
+  bridgeStart: 7500,
   bridgeEnd: 8300,
   waterY: 75,
   waterStart: 8250,

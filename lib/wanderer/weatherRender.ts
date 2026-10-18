@@ -1,3 +1,4 @@
+import { WORLD } from './config';
 import type { Frame } from './frame';
 import { seededRandom, smoothStep } from './math';
 import type { RenderState } from './state';
@@ -115,8 +116,11 @@ export function renderRain(
 ): void {
   const { ctx, cam, SY, w, h, X } = frame;
   // rain over river
-  const rainA = smoothStep(7200, 7500, X) * (1 - smoothStep(8250, 8400, X));
+  const rainA =
+    smoothStep(WORLD.bridgeStart + 200, WORLD.bridgeStart + 500, X) *
+    (1 - smoothStep(WORLD.waterStart, WORLD.waterStart + 150, X));
   if (rainA > 0) {
+    ctx.save();
     ctx.strokeStyle = s.rainColor;
     ctx.lineWidth = 1.2;
     const n = Math.floor(s.rain.length * rainA);
@@ -148,5 +152,6 @@ export function renderRain(
       ctx.ellipse(sx, SY(76), 2 + life * 12, 1 + life * 3, 0, 0, 7);
       ctx.stroke();
     }
+    ctx.restore();
   }
 }

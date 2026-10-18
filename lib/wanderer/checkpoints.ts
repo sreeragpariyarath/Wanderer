@@ -10,7 +10,7 @@ export interface Checkpoint {
 export const CHECKPOINTS: readonly Checkpoint[] = [
   { x: 70, label: 'City' },
   { x: 3500, label: 'Forest' },
-  { x: 6680, label: 'Bridge' },
+  { x: WORLD.bridgeStart - 320, label: 'Bridge' },
   { x: 8200, label: 'River' },
   { x: 10320, label: 'Shore' },
   { x: 11800, label: 'Village' },

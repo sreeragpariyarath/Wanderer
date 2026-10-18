@@ -6,11 +6,23 @@ import { seededRandom, smoothStep } from './math';
 import type { RenderState } from './state';
 import { terrainHeight } from './terrain';
 
-const VISUAL_START = 6800;
+const VISUAL_START = WORLD.bridgeStart;
 const SURFACE_POSE_Y = WORLD.waterY + 38;
+const BRIDGE_BED_START_DEPTH = 16;
+const BRIDGE_BED_END_DEPTH = 190;
+const BRIDGE_BED_BLEND_DISTANCE = 120;
 
 export function riverBedY(x: number): number {
-  return Math.max(WORLD.waterY + 10, terrainHeight(x, x));
+  const terrainBed = Math.max(WORLD.waterY + 10, terrainHeight(x, x));
+  if (x < WORLD.bridgeStart || x > WORLD.bridgeEnd + BRIDGE_BED_BLEND_DISTANCE)
+    return terrainBed;
+
+  const progress = smoothStep(WORLD.bridgeStart, WORLD.bridgeEnd, x);
+  const slopedBridgeBed =
+    WORLD.waterY +
+    BRIDGE_BED_START_DEPTH +
+    (BRIDGE_BED_END_DEPTH - BRIDGE_BED_START_DEPTH) * progress;
+  return Math.max(terrainBed, slopedBridgeBed);
 }
 
 export function enterWater(c: CharacterState): void {
@@ -75,6 +87,7 @@ export function renderWater(
   const right = Math.min(w, WORLD.waterEnd - cam);
   const surface = SY(WORLD.waterY);
   ctx.save();
+  ctx.globalAlpha = 1;
   ctx.beginPath();
   // Close the water against the rising riverbed so the shore has a natural
   // outline instead of the old rectangular edge.
@@ -169,13 +182,14 @@ export function renderWater(
     wx += 7
   ) {
     const edge =
-      smoothStep(VISUAL_START, 6920, wx) *
+      smoothStep(VISUAL_START, VISUAL_START + 120, wx) *
       (1 - smoothStep(WORLD.waterEnd - 120, WORLD.waterEnd, wx));
+    const waveOffset = Math.sin(s.time * 0.65 + wx * 0.018) * 0.75;
     ctx.globalAlpha = edge * 0.85 * (1 - D * 0.35);
     ctx.beginPath();
     ctx.arc(
-      wx - cam + Math.sin(s.time * 0.6 + wx) * 3,
-      SY(WORLD.waterY + Math.sin(s.time * 1.4 + wx * 0.02) * 2.5),
+      wx - cam,
+      SY(WORLD.waterY + waveOffset),
       1.8 + seededRandom(wx * 3) * 2.2,
       0,
       Math.PI * 2,

@@ -77,7 +77,7 @@ test('river exposes vertical swim controls and reaches the far bank', async ({
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await start(page, 'River');
-  await page.locator('canvas').click({ position: { x: 20, y: 20 } });
+  await page.locator('canvas').click({ position: { x: 200, y: 200 } });
   await page.keyboard.down('d');
   const swimUp = page.getByRole('button', { name: 'swim up' });
   const swimDown = page.getByRole('button', { name: 'swim down' });

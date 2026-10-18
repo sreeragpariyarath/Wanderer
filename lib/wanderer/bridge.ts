@@ -1,3 +1,4 @@
+import { WORLD } from './config';
 import type { Frame } from './frame';
 import { seededRandom } from './math';
 import type { RenderState } from './state';
@@ -9,9 +10,9 @@ export function renderBridge(
 ): void {
   const { ctx, cam, SY, w, col } = frame;
   // bridge
-  if (cam + w > 7000 && cam < 8300) {
+  if (cam + w > WORLD.bridgeStart && cam < WORLD.bridgeEnd) {
     ctx.fillStyle = col.mut;
-    for (let wx = 7000; wx <= 8300; wx += 6) {
+    for (let wx = WORLD.bridgeStart; wx <= WORLD.bridgeEnd; wx += 6) {
       const sx = wx - cam;
       if (sx < -10 || sx > w + 10) continue;
       const i = wx / 6;
@@ -26,7 +27,11 @@ export function renderBridge(
         ctx.fill();
       }
     }
-    for (let wx = 7030; wx <= 8280; wx += 140) {
+    for (
+      let wx = WORLD.bridgeStart + 30;
+      wx <= WORLD.bridgeEnd - 20;
+      wx += 140
+    ) {
       const sx = wx - cam,
         y = SY(0);
       ctx.globalAlpha = 0.8;

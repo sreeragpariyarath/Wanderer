@@ -1,3 +1,4 @@
+import { WORLD } from './config';
 import type { Frame } from './frame';
 import { seededRandom, smoothStep } from './math';
 import type { RenderState } from './state';
@@ -26,7 +27,11 @@ export function renderGround(
       (!s.intro.reveal || Math.abs(wx - s.intro.landX) > s.intro.reveal)
     )
       continue;
-    if ((wx > 6990 && wx < 8440) || (wx > 13810 && wx < 13950)) continue;
+    if (
+      (wx > WORLD.bridgeStart - 10 && wx < WORLD.bridgeEnd + 140) ||
+      (wx > 13810 && wx < 13950)
+    )
+      continue;
     const sx = wx - cam,
       r = seededRandom(i),
       gy = SY(terrainHeight(s.character.x, wx) + (r - 0.5) * 3);

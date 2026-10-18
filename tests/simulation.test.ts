@@ -204,6 +204,25 @@ describe('vehicle', () => {
   });
 });
 describe('river swimming', () => {
+  it('slopes the riverbed deeper toward the end of the bridge', () => {
+    const start = riverBedY(WORLD.bridgeStart);
+    const quarter = riverBedY(
+      WORLD.bridgeStart + (WORLD.bridgeEnd - WORLD.bridgeStart) * 0.25,
+    );
+    const middle = riverBedY(
+      WORLD.bridgeStart + (WORLD.bridgeEnd - WORLD.bridgeStart) * 0.5,
+    );
+    const end = riverBedY(WORLD.bridgeEnd);
+
+    expect(quarter).toBeGreaterThan(start);
+    expect(middle).toBeGreaterThan(quarter);
+    expect(end).toBeGreaterThan(middle);
+    expect(end - start).toBeGreaterThan(150);
+    expect(
+      Math.abs(riverBedY(WORLD.bridgeEnd + 1) - riverBedY(WORLD.bridgeEnd - 1)),
+    ).toBeLessThan(2);
+  });
+
   it('keeps the river and shore in daylight', () => {
     for (const x of [8400, WORLD.wreckX, WORLD.waterEnd, 11000])
       expect(darknessAt(x)).toBe(0);

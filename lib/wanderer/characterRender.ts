@@ -70,11 +70,6 @@ export function renderFigure(
   ctx.lineTo(8, hipY + 4);
   ctx.quadraticCurveTo(9, hipY - 10, 3, neckY);
   ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(3, neckY);
-  ctx.lineTo(-7, hipY - 6);
-  ctx.stroke();
-  ctx.strokeRect(-14, hipY - 10, 8, 9);
   const arm = (a: number) => {
     const ex = Math.sin(a) * 13,
       ey = neckY + 4 + Math.cos(a) * 13;
@@ -149,14 +144,15 @@ function renderSwimmer(
   palette: RenderPalette,
 ): void {
   const phase = s.character.gaitPhase;
-  const stroke = Math.sin(phase);
-  const pitch = Math.max(-0.3, Math.min(0.3, s.character.velocityY / 360));
+  const kick = Math.sin(phase * 1.35);
+  const pitch = Math.max(-0.2, Math.min(0.2, s.character.velocityY / 520));
+  const bob = Math.sin(s.time * 3.2) * 0.6;
   ctx.save();
-  ctx.translate(x, y - 28);
+  ctx.translate(x, y - 30 + bob);
   ctx.scale(s.character.facing, 1);
   ctx.rotate(pitch);
   ctx.strokeStyle = palette.ink;
-  ctx.lineWidth = 1.7;
+  ctx.lineWidth = 1.65;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   const limb = (points: ReadonlyArray<readonly [number, number]>) => {
@@ -166,56 +162,76 @@ function renderSwimmer(
     );
     ctx.stroke();
   };
-  // Alternating long flutter kicks trail behind the torso.
+
+  // The rear limbs are drawn first so the body keeps a clean silhouette.
+  ctx.globalAlpha = 0.58;
   limb([
     [-16, 1],
-    [-35, -3 + stroke * 6],
-    [-54, -3 + stroke * 10],
-    [-59, -6 + stroke * 10],
+    [-33, 3 - kick * 4],
+    [-50, 8 - kick * 7],
+    [-57, 6 - kick * 7],
   ]);
+  const farArmPhase = phase + Math.PI;
+  const farReach = Math.cos(farArmPhase);
   limb([
-    [-16, 5],
-    [-35, 8 - stroke * 6],
-    [-53, 8 - stroke * 10],
-    [-58, 5 - stroke * 10],
+    [8, -2],
+    [8 + farReach * 15, -1 + Math.sin(farArmPhase) * 9],
+    [9 + farReach * 30, 3 + Math.sin(farArmPhase) * 13],
+  ]);
+
+  ctx.globalAlpha = 1;
+  limb([
+    [-16, 4],
+    [-32, 6 + kick * 4],
+    [-49, 3 + kick * 7],
+    [-57, 1 + kick * 7],
+  ]);
+
+  // A low, tapered torso reads clearly at both the surface and underwater.
+  ctx.beginPath();
+  ctx.moveTo(10, -5);
+  ctx.quadraticCurveTo(-3, -9, -18, -3);
+  ctx.lineTo(-18, 5);
+  ctx.quadraticCurveTo(-2, 9, 10, 3);
+  ctx.stroke();
+
+  // The near arm follows an oval crawl stroke without crossing the face.
+  const armReach = Math.cos(phase);
+  limb([
+    [8, 1],
+    [8 + armReach * 15, 1 + Math.sin(phase) * 9],
+    [9 + armReach * 30, 5 + Math.sin(phase) * 13],
+  ]);
+
+  // Lift the head slightly, add a short neck, and keep the face unobstructed.
+  limb([
+    [9, -4],
+    [14, -7],
   ]);
   ctx.beginPath();
-  ctx.moveTo(14, -5);
-  ctx.quadraticCurveTo(-2, -10, -18, -4);
-  ctx.lineTo(-18, 7);
-  ctx.quadraticCurveTo(-2, 10, 14, 4);
+  ctx.arc(21, -9, 7.5, 0, Math.PI * 2);
   ctx.stroke();
-  // One arm reaches ahead while the other pulls beneath the body.
-  limb([
-    [10, -3],
-    [26 + stroke * 10, -10 - stroke * 5],
-    [44 + stroke * 11, -5 - stroke * 9],
-  ]);
-  limb([
-    [10, 4],
-    [9 - stroke * 16, 17 + stroke * 5],
-    [-12 - stroke * 18, 11 + stroke * 7],
-  ]);
   ctx.beginPath();
-  ctx.arc(27, -1, 9, 0, Math.PI * 2);
+  ctx.moveTo(28, -9);
+  ctx.lineTo(32, -7);
   ctx.stroke();
   limb([
-    [22, -10],
-    [31, -11],
-    [40, -4],
+    [15, -15],
+    [22, -17],
+    [29, -13],
   ]);
   ctx.fillStyle = palette.ink;
   ctx.beginPath();
-  ctx.arc(32, -1, 1, 0, Math.PI * 2);
+  ctx.arc(24, -10, 0.9, 0, Math.PI * 2);
   ctx.fill();
+
+  // The scarf trails behind the shoulder instead of cutting through the body.
   ctx.strokeStyle = s.accent;
-  limb([
-    [15, -6],
-    [15, 5],
-  ]);
   ctx.beginPath();
-  ctx.moveTo(14, 1);
-  ctx.quadraticCurveTo(-4, 15 + stroke * 3, -26, 9 + stroke * 4);
+  ctx.moveTo(12, -5);
+  ctx.lineTo(9, 2);
+  ctx.moveTo(10, 0);
+  ctx.quadraticCurveTo(-5, 10 + kick * 2, -27, 5 + Math.sin(s.time * 5) * 2);
   ctx.stroke();
   ctx.restore();
 }
