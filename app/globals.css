@@ -598,6 +598,17 @@ a:hover {
   text-align: justify;
   text-wrap: pretty;
 }
+.story-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 4px;
+}
+.story-links a {
+  color: var(--sub, var(--color-accent-700));
+  font-size: 12px;
+  text-underline-offset: 3px;
+}
 .story-action {
   align-self: flex-start;
   margin-top: 6px;

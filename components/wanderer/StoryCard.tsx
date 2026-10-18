@@ -30,6 +30,20 @@ export function StoryCard({
       {view.expanded ? (
         <>
           <p>{content?.[3]}</p>
+          {card?.links && card.links.length > 0 && (
+            <nav className="story-links" aria-label={`${content?.[1]} links`}>
+              {card.links.map(({ label, href }) => (
+                <a
+                  key={`${label}-${href}`}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {label}
+                </a>
+              ))}
+            </nav>
+          )}
           <button type="button" className="story-action" onClick={collapse}>
             {text.close}
           </button>

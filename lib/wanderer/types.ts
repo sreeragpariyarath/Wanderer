@@ -7,11 +7,17 @@ export interface Caption {
   en: string;
 }
 
+export interface SceneLink {
+  readonly label: string;
+  readonly href: string;
+}
+
 export interface SceneCard {
   x: number;
   y?: number;
   revealRadius?: number;
   en: LocalizedCard;
+  links?: readonly SceneLink[];
 }
 
 export interface NumericPalette {

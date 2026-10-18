@@ -1,7 +1,10 @@
+import { createPortfolioSceneContent } from '../portfolio/content';
+import { portfolioProfile } from '../portfolio/profile';
+import type { PortfolioProfile } from '../portfolio/types';
 import type { Caption, SceneCard } from './types';
 import { WORLD } from './config';
 
-export const CAPTIONS: Caption[] = [
+const DEFAULT_CAPTIONS: readonly Caption[] = [
   {
     x: 480,
     en: 'The city wakes before you do.',
@@ -28,7 +31,7 @@ export const CAPTIONS: Caption[] = [
   },
 ];
 
-export const CARDS: SceneCard[] = [
+const DEFAULT_CARDS: readonly SceneCard[] = [
   {
     x: 5100,
     en: [
@@ -95,3 +98,18 @@ export const CARDS: SceneCard[] = [
     ],
   },
 ];
+
+export interface SceneData {
+  readonly captions: readonly Caption[];
+  readonly cards: readonly SceneCard[];
+}
+
+export function createSceneData(profile: PortfolioProfile | null): SceneData {
+  if (profile) return createPortfolioSceneContent(profile);
+  return { captions: DEFAULT_CAPTIONS, cards: DEFAULT_CARDS };
+}
+
+const sceneData = createSceneData(portfolioProfile);
+
+export const CAPTIONS = sceneData.captions;
+export const CARDS = sceneData.cards;

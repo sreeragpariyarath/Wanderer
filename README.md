@@ -44,6 +44,8 @@ The engine runs 60 simulation steps per second and interpolates character, vehic
 
 The world uses positive-down Y coordinates. Bridge jumps and island launches are cinematic triggers. Water crossing emits a splash event without changing physics. Landing and vehicle events drive optional effects. Save data uses safe positions rather than transient flight coordinates.
 
+The planned developer-portfolio narrative and typed content contract are documented in [`docs/portfolio-flow.md`](docs/portfolio-flow.md). Exact content locations live in `lib/portfolio/flow.ts`; no placeholder biography is embedded in production scene data.
+
 ## Verification
 
 ```sh
