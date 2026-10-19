@@ -16,7 +16,7 @@ concurrency:
 
 env:
   # Must match "name" in wrangler.jsonc (checked below).
-  PAGES_PROJECT: sreerag-wanderer
+  PAGES_PROJECT: sreerag
 
 jobs:
   ci:

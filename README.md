@@ -72,11 +72,11 @@ GitHub Actions in `.github/workflows/`:
 - `security.yml` runs `npm audit`, CodeQL, and dependency review on pull requests, plus a weekly schedule. The audit blocks on critical only, as a temporary documented exception for a PostCSS advisory bundled in Next 15; reassess when upgrading Next.js.
 - `deploy.yml` runs on `main` and manual dispatch: it re-runs CI, publishes the tested `out/` artifact to Cloudflare Pages with `wrangler pages deploy`, then smoke-tests both the deployment URL and the production URL (status, CSP, `X-Frame-Options`, immutable asset caching).
 
-Hosting is Cloudflare Pages (free plan), project `sreerag-wanderer`, production branch `main`, serving the static export. `wrangler.jsonc` configures the Pages project and `public/_headers` supplies security and cache headers. `npm run preview` serves the export locally through the Pages runtime with those headers.
+Hosting is Cloudflare Pages (free plan), project `sreerag`, production branch `main`, serving the static export. `wrangler.jsonc` configures the Pages project and `public/_headers` supplies security and cache headers. `npm run preview` serves the export locally through the Pages runtime with those headers.
 
 Setup:
 
-1. Create the project once: `npx wrangler pages project create sreerag-wanderer --production-branch main`.
+1. Create the project once: `npx wrangler pages project create sreerag --production-branch main`.
 2. In a GitHub `production` environment add secrets `CLOUDFLARE_API_TOKEN` (account permission Cloudflare Pages: Edit only) and `CLOUDFLARE_ACCOUNT_ID`.
-3. After the custom domain is live, set the repository variable `SITE_URL` (for example `https://sreerag.is-a.dev`); until then it defaults to `https://sreerag-wanderer.pages.dev`.
+3. After the custom domain is live, set the repository variable `SITE_URL` (for example `https://sreerag.is-a.dev`); until then it defaults to `https://sreerag.pages.dev`.
 4. Require the `CI gate` check on `main`.
