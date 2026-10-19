@@ -74,6 +74,8 @@ GitHub Actions in `.github/workflows/`:
 
 Hosting is Cloudflare Pages (free plan), project `sreerag`, production branch `main`, serving the static export. `wrangler.jsonc` configures the Pages project and `public/_headers` supplies security and cache headers. `npm run preview` serves the export locally through the Pages runtime with those headers.
 
+Full details, including the is-a.dev domain status, are in [docs/deployment.md](docs/deployment.md).
+
 Setup:
 
 1. Create the project once: `npx wrangler pages project create sreerag --production-branch main`.
