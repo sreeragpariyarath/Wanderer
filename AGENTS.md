@@ -20,7 +20,7 @@ Feature modules must not import `WandererEngine` or use `.call(this)`. Accept ex
 - `npm run format`: apply formatting.
 - `npm run build` then `npm start`: production build and server.
 
-Before submitting changes, run the relevant tests, typecheck, lint, format check, and production build. Manually verify movement, run, Space/contextual actions, pointer controls, loading, sound, persistence, and viewport resizing. Capture screenshots for artwork/layout changes.
+CI runs the same checks on every pull request (the `CI gate` job must pass), and `main` deploys to Cloudflare as a static export, so keep the app free of server-only Next features. Before submitting changes, run the relevant tests, typecheck, lint, format check, and production build. Manually verify movement, run, Space/contextual actions, pointer controls, loading, sound, persistence, and viewport resizing. Capture screenshots for artwork/layout changes.
 
 ## Coding conventions
 
