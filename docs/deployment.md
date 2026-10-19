@@ -1,6 +1,7 @@
 # Deployment and CI/CD
 
 This document records how Wanderer is built, tested, hosted, and published, and what is still pending. It describes the setup as of 2026-10-19.
+The reasoning behind each choice is in [decisions.md](decisions.md).
 
 ## At a glance
 
