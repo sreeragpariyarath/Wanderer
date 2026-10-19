@@ -63,3 +63,20 @@ Unit tests cover physics, input sources, timing, lifecycle, storage, and render 
 Manual regression checks: normal/skip intro, walk/run/backtrack, bridge jump, underwater W/S swimming and both river exits, island landing, car entry/exit/arrival, pointer cancellation, multi-touch movement, hidden-tab resume, sound, checkpoint bar jumps, short-screen story scrolling, resize and orientation changes. Compare representative intro/city/forest/bridge/river/village/island screenshots when changing artwork.
 
 Use `npm run format` to apply the repository formatter. Generated browser reports, screenshots, and local review artifacts are ignored by Git.
+
+## CI/CD
+
+GitHub Actions in `.github/workflows/`:
+
+- `ci.yml` runs on pull requests: typecheck, lint, format check, unit tests, production build (static export to `out/`, with a client JS budget), and Playwright e2e for desktop and mobile against that exported build. The `CI gate` job is the one status check to require in branch protection.
+- `security.yml` runs `npm audit`, CodeQL, and dependency review on pull requests, plus a weekly schedule. The audit blocks on critical only, as a temporary documented exception for a PostCSS advisory bundled in Next 15; reassess when upgrading Next.js.
+- `deploy.yml` runs on `main` and manual dispatch: it re-runs CI, publishes the tested `out/` artifact to Cloudflare Pages with `wrangler pages deploy`, then smoke-tests both the deployment URL and the production URL (status, CSP, `X-Frame-Options`, immutable asset caching).
+
+Hosting is Cloudflare Pages (free plan), project `sreerag-wanderer`, production branch `main`, serving the static export. `wrangler.jsonc` configures the Pages project and `public/_headers` supplies security and cache headers. `npm run preview` serves the export locally through the Pages runtime with those headers.
+
+Setup:
+
+1. Create the project once: `npx wrangler pages project create sreerag-wanderer --production-branch main`.
+2. In a GitHub `production` environment add secrets `CLOUDFLARE_API_TOKEN` (account permission Cloudflare Pages: Edit only) and `CLOUDFLARE_ACCOUNT_ID`.
+3. After the custom domain is live, set the repository variable `SITE_URL` (for example `https://sreerag.is-a.dev`); until then it defaults to `https://sreerag-wanderer.pages.dev`.
+4. Require the `CI gate` check on `main`.
