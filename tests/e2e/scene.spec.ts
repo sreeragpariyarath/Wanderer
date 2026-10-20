@@ -62,8 +62,8 @@ test('checkpoint bar jumps to a section and tracks the current one', async ({
 }) => {
   await start(page);
   const bar = page.getByRole('navigation', { name: 'Checkpoints' });
-  await expect(bar.getByRole('button')).toHaveCount(4);
-  for (const name of ['Forest', 'River', 'City']) {
+  await expect(bar.getByRole('button')).toHaveCount(5);
+  for (const name of ['Forest', 'Grove', 'City']) {
     await bar.getByRole('button', { name }).click();
     await expect(bar.getByRole('button', { name })).toHaveAttribute(
       'aria-current',

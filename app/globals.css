@@ -656,12 +656,20 @@ a:hover {
   gap: 14px;
   font: italic 22px var(--font-heading);
 }
+.intro-title {
+  font-size: clamp(26px, 3vw, 40px);
+  color: var(--color-text);
+}
+.intro-title em {
+  color: var(--color-accent);
+}
 .loading-overlay button {
   font: 12px var(--font-body);
-  padding: 8px 14px;
+  padding: 8px 18px;
   color: var(--color-text);
-  background: var(--color-bg);
+  background: color-mix(in srgb, var(--color-bg) 85%, transparent);
   border: 1px solid var(--color-divider);
+  border-radius: 18px;
   cursor: pointer;
 }
 .intro-progress {

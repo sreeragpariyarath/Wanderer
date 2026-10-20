@@ -82,36 +82,70 @@ export function createScene(): SceneState {
   const SWX = -330,
     LEDGE = -150,
     PIV = LEDGE - 215;
+  // The intro tree, as in the design: a thick pebbled trunk that leans and
+  // curves to the right, a long limb out to the swing, and a wide, loose
+  // crown spreading over both.
   s.introTree = [];
-  for (let i = 0; i < 60; i++) {
-    const u = seededRandom(i + 4000);
-    s.introTree.push({
-      x: SWX - 110 + (seededRandom(i + 4100) - 0.5) * 9,
-      yy: PIV + u * (LEDGE - PIV),
-      r: 1.3 + seededRandom(i + 4200) * 2,
-      t: 1,
-      c: 0,
-    });
+  const baseX = SWX - 210,
+    forkX = SWX - 150,
+    forkY = LEDGE - 230;
+  // Trunk: tidy rows of round pebbles across a smooth curve, tapering up.
+  for (let i = 0; i <= 46; i++) {
+    const t = i / 46,
+      cx =
+        (1 - t) * (1 - t) * baseX +
+        2 * (1 - t) * t * (baseX - 10) +
+        t * t * forkX,
+      cy = LEDGE + (forkY - LEDGE) * t,
+      half = 13 * (1 - t) + 5,
+      lanes = Math.max(2, Math.round(half / 3.4)),
+      shift = i % 2 ? 0.5 : 0;
+    for (let k = 0; k < lanes; k++) {
+      const u = (k + shift) / lanes - 0.5;
+      s.introTree.push({
+        x: cx + u * half * 2,
+        yy: cy + (seededRandom(i * 7 + k + 4100) - 0.5) * 1.5,
+        r: 2.6 + seededRandom(i * 7 + k + 4200) * 0.9 - t * 0.6,
+        t: 1,
+        c: 0,
+      });
+    }
   }
-  for (let i = 0; i < 30; i++) {
-    const u = i / 29;
+  // Limbs: one long arm to the swing pivot, a few shorter ones into the crown.
+  for (const [n, [tx, ty, w]] of [
+    [SWX, PIV, 7],
+    [SWX - 330, LEDGE - 300, 3.5],
+    [SWX - 150, LEDGE - 340, 3.5],
+    [SWX - 30, LEDGE - 320, 3],
+  ].entries())
+    for (let i = 0; i <= 50; i++) {
+      const u = i / 50,
+        bow = Math.sin(u * Math.PI) * (n === 0 ? -26 : -14);
+      s.introTree.push({
+        x:
+          forkX +
+          (tx - forkX) * u +
+          (seededRandom(i + n * 97 + 4300) - 0.5) * 2,
+        yy: forkY + (ty - forkY) * u + bow,
+        r: w * (1 - u * 0.6) * (0.5 + seededRandom(i + n * 97 + 4400) * 0.3),
+        t: 1,
+        c: 0,
+      });
+    }
+  // Wide, loose crown: dense in the middle and scattered at the edges.
+  const crownX = SWX - 160,
+    crownY = LEDGE - 330;
+  for (let i = 0; i < 1500; i++) {
+    const a = seededRandom(i + 4500) * Math.PI * 2,
+      rr = Math.pow(seededRandom(i + 4600), 0.62),
+      x = crownX + Math.cos(a) * rr * 250,
+      y = crownY + Math.sin(a) * rr * 120 + (Math.cos(a) * rr > 0 ? 10 : 0);
     s.introTree.push({
-      x: SWX - 110 + u * 150,
-      yy: PIV - Math.sin(u * 3) * 5 + (seededRandom(i + 4300) - 0.5) * 3,
-      r: 1.2 + seededRandom(i + 4400) * 1.5,
-      t: 1,
-      c: 0,
-    });
-  }
-  for (let i = 0; i < 320; i++) {
-    const an = seededRandom(i + 4500) * 6.28,
-      rr = Math.sqrt(seededRandom(i + 4600));
-    s.introTree.push({
-      x: SWX - 50 + Math.cos(an) * rr * 120,
-      yy: PIV - 18 + Math.sin(an) * rr * 40,
-      r: 1.3 + seededRandom(i + 4700) * 2.6,
+      x,
+      yy: y,
+      r: 1.2 + seededRandom(i + 4700) * 3.4 * (1 - rr * 0.5),
       t: 0,
-      c: seededRandom(i + 4800),
+      c: seededRandom(i + 4800) * 0.5 + (y - (crownY - 120)) / 480,
     });
   }
   s.introDots = Array.from({ length: 70 }, (_, i) => ({

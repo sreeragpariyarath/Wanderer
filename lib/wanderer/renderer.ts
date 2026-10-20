@@ -24,7 +24,13 @@ export class SceneRenderer {
     const frame = createFrame(s, ctx, w, h),
       { cam, SY, col } = frame;
     frame.layer = (id, draw, alpha, offsetY) => {
-      const key = `${id}:${pw}x${ph}:${col.bg}`;
+      // Key on a coarse brightness bucket of the background, so a day/night
+      // fade redraws a cached layer only a few times rather than every frame.
+      const levels = col.bg.match(/d+/g)?.map(Number) ?? [0],
+        tone = Math.round(
+          levels.reduce((sum, v) => sum + v, 0) / levels.length / 64,
+        ),
+        key = `${id}:${pw}x${ph}:${tone}`;
       let layer = this.layers.get(key);
       if (!layer) {
         for (const old of this.layers.keys())

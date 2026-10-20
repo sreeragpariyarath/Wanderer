@@ -1,8 +1,8 @@
 export const WORLD = {
-  // The journey ends on a short beach just after the river.
-  width: 11000,
+  // After the river beach, the journey ends in a glowing mushroom grove.
+  width: 13700,
   minX: 30,
-  maxX: 10880,
+  maxX: 13400,
   startX: 70,
   bridgeStart: 7500,
   bridgeEnd: 8300,

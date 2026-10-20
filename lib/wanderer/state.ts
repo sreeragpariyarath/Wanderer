@@ -26,7 +26,7 @@ export class SceneState {
   camera = { x: -330, y: -150 };
   reducedMotion = false;
   cardOpacity = 0;
-  worldWidth = 11000;
+  worldWidth = 13700;
   captions = CAPTIONS;
   cards = CARDS;
   time = 0;

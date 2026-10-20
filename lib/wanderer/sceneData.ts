@@ -29,6 +29,10 @@ const DEFAULT_CAPTIONS: readonly Caption[] = [
     x: 9700,
     en: 'The shore waits where the river lets go.',
   },
+  {
+    x: 11150,
+    en: 'The forest glows where silence grows.',
+  },
 ];
 
 const DEFAULT_CARDS: readonly SceneCard[] = [

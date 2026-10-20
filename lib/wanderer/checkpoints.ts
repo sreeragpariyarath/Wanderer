@@ -12,6 +12,7 @@ export const CHECKPOINTS: readonly Checkpoint[] = [
   { x: 3500, label: 'Forest' },
   { x: WORLD.bridgeStart - 320, label: 'Bridge' },
   { x: 8200, label: 'River' },
+  { x: 11000, label: 'Grove' },
 ];
 
 export function safePosition(x: number): number {

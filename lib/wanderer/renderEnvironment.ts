@@ -10,6 +10,7 @@ import {
 import { renderCityBackdrop, renderCityStreet } from './cityBackdrop';
 import type { Frame } from './frame';
 import { renderGround } from './ground';
+import { renderGrove, renderGroveBackdrop } from './grove';
 import { renderRiverSky } from './riverSky';
 import { renderParticleRender } from './particleRender';
 import type { RenderState } from './state';
@@ -24,11 +25,13 @@ export function renderEnvironment(s: RenderState, frame: Frame): void {
   renderForestBackdrop(s, frame);
   renderBridgeBackdrop(s, frame);
   renderRiverSky(s, frame);
+  renderGroveBackdrop(s, frame);
   renderCity(s, ctx, cam, SY, w, col);
   renderCityStreet(s, frame);
   renderStars(s, frame);
   renderTrees(s, frame);
   renderForestUndergrowth(s, frame);
+  renderGrove(s, frame);
   renderForestSeeds(s, frame);
   renderRain(s, frame);
   renderWater(s, frame);

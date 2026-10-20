@@ -10,7 +10,9 @@ export function LoadingOverlay({
   const text = labels();
   return (
     <div className="loading-overlay" hidden={view.ready || view.error}>
-      <span>{text.intro}</span>
+      <span className="intro-title">
+        A <em>journey</em> begins
+      </span>
       <span className="intro-progress" aria-hidden="true">
         {view.introProgress}%
       </span>
