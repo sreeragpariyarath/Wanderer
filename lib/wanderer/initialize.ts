@@ -1,7 +1,6 @@
 import { seededRandom } from './math';
 import { SceneState } from './state';
 import { createTreePoints } from './trees';
-import type { HousePoint } from './types';
 export function createScene(): SceneState {
   const s = new SceneState();
   // Medium trees with room between them, and one large tree, as in the design.
@@ -79,69 +78,6 @@ export function createScene(): SceneState {
     s: seededRandom(i + 1200),
   }));
   s.villageColors = ['#5f8fa0', '#c0725e', '#9a9a9a', '#d9a35b', '#7fa9a0'];
-  s.houses = [
-    [12300, 0],
-    [12560, 0],
-    [12850, 1],
-    [13180, 0],
-    [13450, 0],
-  ].map(([hx, type], hi) => {
-    const pts: HousePoint[] = [],
-      wins: [number, number, boolean?][] = [];
-    const dashLine = (
-      x1: number,
-      y1: number,
-      x2: number,
-      y2: number,
-      step: number,
-      horiz: boolean,
-    ) => {
-      const d = Math.hypot(x2 - x1, y2 - y1),
-        n = Math.max(1, Math.floor(d / step));
-      for (let i = 0; i <= n; i++) {
-        const t = i / n,
-          k = pts.length;
-        pts.push({
-          x: x1 + (x2 - x1) * t,
-          y: y1 + (y2 - y1) * t,
-          len: horiz ? 9 : 6,
-          horiz,
-          c: s.villageColors[Math.floor(seededRandom(hi * 997 + k) * 4)],
-          s: seededRandom(hi * 331 + k),
-          a: seededRandom(hi * 113 + k) * 6.28,
-        });
-      }
-    };
-    if (type === 0) {
-      const hw = 55 + seededRandom(hi) * 20,
-        hh = 70 + seededRandom(hi + 5) * 25,
-        rh = 40;
-      dashLine(-hw, 0, -hw, -hh, 7, true);
-      dashLine(hw, 0, hw, -hh, 7, true);
-      dashLine(-hw - 12, -hh, 0, -hh - rh, 8, false);
-      dashLine(0, -hh - rh, hw + 12, -hh, 8, false);
-      dashLine(-12, 0, -12, -32, 7, true);
-      dashLine(12, 0, 12, -32, 7, true);
-      wins.push([-hw * 0.6, -hh * 0.55], [hw * 0.6, -hh * 0.55]);
-    } else {
-      const hw = 30,
-        hh = 230;
-      dashLine(-hw, 0, -hw, -hh, 7, true);
-      dashLine(hw, 0, hw, -hh, 7, true);
-      dashLine(-hw - 10, -hh, 0, -hh - 36, 7, false);
-      dashLine(0, -hh - 36, hw + 10, -hh, 7, false);
-      wins.push([0, -hh + 14, true]);
-    }
-    return { x: hx, pts, wins };
-  });
-  s.ridges = [0, 1].map((L) =>
-    Array.from({ length: 30 }, (_, k) => [
-      k * 150,
-      -(k % 2
-        ? 140 + seededRandom(k + L * 50) * 90
-        : 30 + seededRandom(k + 9 + L * 50) * 40) * (L ? 0.7 : 1),
-    ]),
-  );
 
   const SWX = -330,
     LEDGE = -150,

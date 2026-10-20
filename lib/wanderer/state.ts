@@ -2,7 +2,6 @@ import { createCharacter } from './character';
 import { CAPTIONS, CARDS } from './sceneData';
 import type {
   Building,
-  House,
   IntroState,
   IntroTreePoint,
   NumericPalette,
@@ -27,7 +26,7 @@ export class SceneState {
   camera = { x: -330, y: -150 };
   reducedMotion = false;
   cardOpacity = 0;
-  worldWidth = 16000;
+  worldWidth = 11000;
   captions = CAPTIONS;
   cards = CARDS;
   time = 0;
@@ -60,8 +59,6 @@ export class SceneState {
   rain: Array<{ x: number; y: number; sp: number }> = [];
   stars: Array<{ x: number; y: number; s: number }> = [];
   villageColors: string[] = [];
-  houses: House[] = [];
-  ridges: [number, number][][] = [];
   dayPalette: NumericPalette = defaultPalette();
   darkPalette: NumericPalette = defaultPalette();
   nightPalette: NumericPalette = defaultPalette();

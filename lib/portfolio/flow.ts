@@ -1,7 +1,6 @@
 import { WORLD } from '../wanderer/config';
 
-export type PortfolioZone =
-  'City' | 'Forest' | 'Bridge' | 'River' | 'Shore' | 'Village' | 'Island';
+export type PortfolioZone = 'City' | 'Forest' | 'Bridge' | 'River';
 
 export type PortfolioPresentation =
   'ambient' | 'story-card' | 'landmark' | 'finale';
@@ -73,32 +72,32 @@ export const PORTFOLIO_FLOW: readonly PortfolioWorldSlot[] = [
   },
   {
     id: 'project-two',
-    zone: 'Shore',
-    x: 10600,
+    zone: 'River',
+    x: 10420,
     presentation: 'story-card',
     purpose: 'Second project with live and source links when available.',
     required: false,
   },
   {
     id: 'project-three',
-    zone: 'Shore',
-    x: 11100,
+    zone: 'River',
+    x: 10560,
     presentation: 'story-card',
     purpose: 'Optional third project or a compact open-source contribution.',
     required: false,
   },
   {
     id: 'education',
-    zone: 'Village',
-    x: 13000,
+    zone: 'River',
+    x: 10700,
     presentation: 'landmark',
     purpose: 'Education, certifications, teamwork, and community details.',
     required: true,
   },
   {
     id: 'contact',
-    zone: 'Island',
-    x: 14800,
+    zone: 'River',
+    x: 10840,
     presentation: 'finale',
     purpose:
       'Email, résumé, GitHub, LinkedIn, availability, and journey restart.',

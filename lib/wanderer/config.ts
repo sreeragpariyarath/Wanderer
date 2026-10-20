@@ -1,7 +1,8 @@
 export const WORLD = {
-  width: 16000,
+  // The journey ends on a short beach just after the river.
+  width: 11000,
   minX: 30,
-  maxX: 15940,
+  maxX: 10880,
   startX: 70,
   bridgeStart: 7500,
   bridgeEnd: 8300,
@@ -10,8 +11,6 @@ export const WORLD = {
   waterStart: 8250,
   waterEnd: 10300,
   wreckX: 9300,
-  launchX: 13800,
-  islandStart: 13950,
   roadStart: 450,
   roadEnd: 6670,
 } as const;
@@ -20,8 +19,6 @@ export const MOTION = {
   walk: 170,
   run: 420,
   bridgeJump: -280,
-  launch: -1500,
-  launchSpeed: 160,
 } as const;
 export const STEP = 1 / 60;
 export const PARTICLE_LIMIT = 1200;

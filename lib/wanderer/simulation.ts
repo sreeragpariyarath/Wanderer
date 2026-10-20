@@ -104,7 +104,6 @@ export class SceneSimulation {
       s.character.x,
       s.character.y +
         (s.character.mode === 'swimming' ? viewport.height * 0.16 : 0),
-      s.character.mode === 'scripted-launch',
       dt,
     );
     if (

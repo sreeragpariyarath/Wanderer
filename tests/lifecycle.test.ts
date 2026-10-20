@@ -138,8 +138,8 @@ describe('lifecycle and browser boundary', () => {
     engine.goToCheckpoint(CHECKPOINTS.length);
     expect(engine.getSnapshot().checkpoint).toBe(0);
     engine.hold(1, 'right');
-    engine.goToCheckpoint(4);
-    expect(engine.getSnapshot()).toMatchObject({ checkpoint: 4, direction: 0 });
+    engine.goToCheckpoint(3);
+    expect(engine.getSnapshot()).toMatchObject({ checkpoint: 3, direction: 0 });
     engine.goToCheckpoint(0);
     expect(engine.getSnapshot().checkpoint).toBe(0);
     engine.dispose();
@@ -159,7 +159,8 @@ describe('lifecycle and browser boundary', () => {
       { canvas, overlays } = mount();
     engine.start(canvas, overlays);
     engine.skipIntro();
-    engine.goToCheckpoint(4);
+    // The bridge checkpoint stands beside the Halfway story card.
+    engine.goToCheckpoint(2);
     const repeat = new KeyboardEvent('keydown', {
       key: ' ',
       repeat: true,

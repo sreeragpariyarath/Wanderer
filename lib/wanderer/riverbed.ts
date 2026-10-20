@@ -69,6 +69,15 @@ export function renderRiverSand(
     ctx.globalAlpha = (0.25 + (1 - depth) * 0.45) * alpha;
     ctx.fillRect(wx - cam, y, 1.4 + r, 1.4 + r);
   }
+  // Fade the sand out just past the far bank so it meets the shore softly.
+  const end = WORLD.waterEnd - cam,
+    fadeOut = ctx.createLinearGradient(end, 0, end + 320, 0);
+  fadeOut.addColorStop(0, 'rgba(0,0,0,0)');
+  fadeOut.addColorStop(1, 'rgba(0,0,0,1)');
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = fadeOut;
+  ctx.fillRect(end, 0, 340, h);
   ctx.restore();
   // Half-buried grey rocks along the bed.
   for (let i = 0; i < 11; i++) {

@@ -3,12 +3,7 @@ import { crossesForward, integrateVertical } from './physics';
 import { terrainHeight } from './terrain';
 
 export type CharacterMode =
-  | 'introductory'
-  | 'grounded'
-  | 'airborne'
-  | 'scripted-launch'
-  | 'swimming'
-  | 'seated';
+  'introductory' | 'grounded' | 'airborne' | 'swimming' | 'seated';
 export interface CharacterState {
   mode: CharacterMode;
   x: number;
@@ -26,7 +21,6 @@ export interface CharacterState {
 export type SceneEvent = {
   type:
     | 'landing'
-    | 'launch'
     | 'step'
     | 'splash'
     | 'vehicle-entry'
@@ -82,28 +76,19 @@ export function updateCharacter(
   c.velocityX +=
     (input.direction * (input.run ? MOTION.run : MOTION.walk) - c.velocityX) *
     (1 - Math.exp(-6 * dt));
-  if (c.mode === 'scripted-launch') c.velocityX = MOTION.launchSpeed;
   c.x = Math.max(WORLD.minX, Math.min(WORLD.maxX, c.x + c.velocityX * dt));
   if (
     (c.x === WORLD.minX && c.velocityX < 0) ||
     (c.x === WORLD.maxX && c.velocityX > 0)
   )
     c.velocityX = 0;
-  if (input.direction && c.mode !== 'scripted-launch')
-    c.facing = input.direction;
+  if (input.direction) c.facing = input.direction;
   if (wasGrounded && crossesForward(previousX, c.x, WORLD.bridgeEnd)) {
     c.mode = 'airborne';
     // A runner needs a flatter arc to cross the water before its far bank.
     c.velocityY =
       MOTION.bridgeJump *
       Math.min(1, MOTION.walk / Math.max(MOTION.walk, Math.abs(c.velocityX)));
-  }
-  if (wasGrounded && crossesForward(previousX, c.x, WORLD.launchX)) {
-    c.mode = 'scripted-launch';
-    c.velocityY = MOTION.launch;
-    c.velocityX = MOTION.launchSpeed;
-    c.facing = 1;
-    events.push({ type: 'launch', x: c.x, y: c.y });
   }
   const ground = terrainHeight(c.x, c.x);
   // Normal slopes follow the surface; abrupt downward ledges cause a fall.
@@ -116,18 +101,13 @@ export function updateCharacter(
       c,
       ground,
       dt,
-      (c.mode !== 'scripted-launch' || c.x >= WORLD.islandStart) &&
-        !(c.x > WORLD.bridgeEnd && c.x < WORLD.waterEnd),
+      !(c.x > WORLD.bridgeEnd && c.x < WORLD.waterEnd),
     )
   ) {
     c.mode = 'grounded';
     events.push({ type: 'landing', x: c.x, y: c.y });
   }
-  if (
-    c.mode === 'grounded' &&
-    !(c.x >= WORLD.launchX && c.x < WORLD.islandStart)
-  )
-    c.safeX = c.x;
+  if (c.mode === 'grounded') c.safeX = c.x;
   const speed = Math.abs(c.velocityX),
     previousStep = Math.floor(c.gaitPhase / Math.PI);
   if (speed > 4) {

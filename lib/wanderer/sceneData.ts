@@ -29,14 +29,6 @@ const DEFAULT_CAPTIONS: readonly Caption[] = [
     x: 9700,
     en: 'The shore waits where the river lets go.',
   },
-  {
-    x: 11550,
-    en: 'Up, and the light comes back.',
-  },
-  {
-    x: 15700,
-    en: 'The horizon keeps its promise by moving.',
-  },
 ];
 
 const DEFAULT_CARDS: readonly SceneCard[] = [
@@ -76,42 +68,6 @@ const DEFAULT_CARDS: readonly SceneCard[] = [
       'The Quiet Wreck',
       'A broken wooden boat, resting among the river plants.',
       'The hull is split and its mast has fallen, but the river has made a home of it. Small fish shelter between the ribs, and new plants grow through the planks. Pause here, then follow the current toward the shore.',
-    ],
-  },
-  {
-    x: 10600,
-    en: [
-      'Web / Tools / Automation',
-      'Lantern',
-      'Small tools for lighting up repetitive work.',
-      'Experiments and working notes on web development, automation and the quiet tools that make everyday work lighter.',
-    ],
-  },
-  {
-    x: 11100,
-    en: [
-      'Sound / Experiments',
-      'Undertow',
-      'Field recordings and generative sound.',
-      'Rain on tin roofs, harbour bells and patterns that play themselves — collected, layered and left running.',
-    ],
-  },
-  {
-    x: 13000,
-    en: [
-      'Travel / Food / Daily records',
-      'Kitchen Atlas',
-      'Towns and meals, written down as they happened.',
-      'A running record of places eaten in and streets walked through, kept honestly and without stars.',
-    ],
-  },
-  {
-    x: 14800,
-    en: [
-      'Games / Long-running world',
-      'Blockhouse',
-      'A slow build in a world made of cubes.',
-      'One world, played for years: a house, then a village, then a railway to nowhere in particular.',
     ],
   },
 ];

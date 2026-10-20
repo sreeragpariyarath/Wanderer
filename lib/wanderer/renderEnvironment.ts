@@ -10,20 +10,20 @@ import {
 import { renderCityBackdrop, renderCityStreet } from './cityBackdrop';
 import type { Frame } from './frame';
 import { renderGround } from './ground';
-import { seededRandom } from './math';
+import { renderRiverSky } from './riverSky';
 import { renderParticleRender } from './particleRender';
 import type { RenderState } from './state';
 import { renderTrees } from './trees';
 import { renderCar } from './vehicleRender';
-import { renderVillage } from './village';
 import { renderWater, renderWaterOverlay } from './water';
 import { renderRain, renderSky, renderStars } from './weatherRender';
 export function renderEnvironment(s: RenderState, frame: Frame): void {
-  const { ctx, cam, SY, w, h, col, X, nightA } = frame;
+  const { ctx, cam, SY, w, h, col, X } = frame;
   renderSky(s, frame);
   renderCityBackdrop(s, frame);
   renderForestBackdrop(s, frame);
   renderBridgeBackdrop(s, frame);
+  renderRiverSky(s, frame);
   renderCity(s, ctx, cam, SY, w, col);
   renderCityStreet(s, frame);
   renderStars(s, frame);
@@ -33,35 +33,6 @@ export function renderEnvironment(s: RenderState, frame: Frame): void {
   renderRain(s, frame);
   renderWater(s, frame);
   renderBridge(s, frame);
-  renderVillage(s, frame);
-  // floating island underside
-  if (cam + w > 13900) {
-    const top = SY(-900);
-    for (
-      let wx = Math.max(13950, Math.floor(cam / 10) * 10);
-      wx < Math.min(s.worldWidth, cam + w + 10);
-      wx += 10
-    ) {
-      const sx = wx - cam,
-        u = (wx - 13950) / (s.worldWidth - 13950),
-        depth = Math.sin(Math.PI * Math.min(1, u * 1.6)) * 260;
-      for (let k = 1; k <= 4; k++) {
-        const rv = seededRandom(wx * 0.37 + k * 71);
-        if (rv < 0.4) continue;
-        ctx.globalAlpha = (0.25 + rv * 0.35) * nightA * (1 - k * 0.15);
-        ctx.fillStyle = s.particleColors[Math.floor(rv * 2)];
-        ctx.beginPath();
-        ctx.arc(
-          sx,
-          top + depth * (k / 4) + Math.sin(s.time * 0.7 + wx * 0.01) * 2,
-          1 + rv * 1.6,
-          0,
-          7,
-        );
-        ctx.fill();
-      }
-    }
-  }
   ctx.globalAlpha = 1;
 
   renderGround(s, frame);

@@ -7,10 +7,9 @@ export function terrainHeight(playerX: number, x: number): number {
     (smoothStep(WORLD.bridgeStart - 150, WORLD.bridgeStart, x) -
       smoothStep(WORLD.bridgeEnd, WORLD.bridgeEnd + 60, x));
   y += 260 * smoothStep(WORLD.bridgeEnd, WORLD.bridgeEnd + 120, x);
-  // A shallow shore replaces the abrupt wall at the river's far edge.
-  y -= 180 * smoothStep(9950, 10300, x) * (1 - smoothStep(10300, 10900, x));
-  y -= 560 * smoothStep(11000, 12100, x);
-  y -= 900 * smoothStep(13900, 13940, x);
+  // The far bank rises out of the river to just above the water line and
+  // stays level, so walking out onto the shore needs no dip and climb.
+  y -= 240 * smoothStep(9950, 10300, x);
   if (
     x > WORLD.bridgeStart &&
     x < WORLD.bridgeEnd &&

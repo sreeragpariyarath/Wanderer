@@ -167,7 +167,17 @@ export function renderWater(
   if (below > 0.01) {
     ctx.save();
     ctx.globalAlpha = below;
-    renderRiverSand(ctx, cam, SY, riverBedY, left, right, h, below);
+    // The sand runs a little past the river and fades into the shore.
+    renderRiverSand(
+      ctx,
+      cam,
+      SY,
+      riverBedY,
+      left,
+      Math.min(w, WORLD.waterEnd + 320 - cam),
+      h,
+      below,
+    );
     renderRiverPlants(
       ctx,
       cam,

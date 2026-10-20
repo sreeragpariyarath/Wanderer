@@ -12,9 +12,6 @@ export const CHECKPOINTS: readonly Checkpoint[] = [
   { x: 3500, label: 'Forest' },
   { x: WORLD.bridgeStart - 320, label: 'Bridge' },
   { x: 8200, label: 'River' },
-  { x: 10320, label: 'Shore' },
-  { x: 11800, label: 'Village' },
-  { x: 14000, label: 'Island' },
 ];
 
 export function safePosition(x: number): number {
@@ -22,7 +19,7 @@ export function safePosition(x: number): number {
     return x < (WORLD.waterStart + WORLD.waterEnd) / 2
       ? WORLD.waterStart - 50
       : WORLD.waterEnd + 20;
-  return x >= WORLD.launchX && x < WORLD.islandStart ? WORLD.launchX - 10 : x;
+  return x;
 }
 
 // Index of the latest checkpoint the given position has reached.
