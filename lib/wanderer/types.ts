@@ -130,14 +130,6 @@ export interface Building {
   seed: number;
 }
 
-export interface BackBuilding {
-  x: number;
-  w: number;
-  h: number;
-  c: string;
-  seed: number;
-}
-
 export interface HousePoint {
   x: number;
   y: number;

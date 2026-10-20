@@ -1,6 +1,7 @@
 import { renderBridge } from './bridge';
 import { renderCity } from './buildings';
 import { renderFigure } from './characterRender';
+import { renderCityBackdrop, renderCityStreet } from './cityBackdrop';
 import { renderClouds } from './clouds';
 import type { Frame } from './frame';
 import { renderGround } from './ground';
@@ -19,7 +20,9 @@ export function renderEnvironment(s: RenderState, frame: Frame): void {
   renderClouds(s, frame);
   renderSky(s, frame);
   renderMountains(s, frame);
+  renderCityBackdrop(s, frame);
   renderCity(s, ctx, cam, SY, w, col);
+  renderCityStreet(s, frame);
   renderStars(s, frame);
   renderTrees(s, frame);
   // seeds
@@ -80,7 +83,11 @@ export function renderEnvironment(s: RenderState, frame: Frame): void {
   renderGround(s, frame);
   renderParticleRender(s, frame);
   // captions
-  for (const c of s.captions) {
+  // Only the nearest caption is drawn so neighbours never overlap mid-fade.
+  let nearest: (typeof s.captions)[number] | undefined;
+  for (const c of s.captions)
+    if (!nearest || Math.abs(X - c.x) < Math.abs(X - nearest.x)) nearest = c;
+  for (const c of nearest ? [nearest] : []) {
     const d = Math.abs(X - c.x);
     if (d > 600) continue;
     ctx.globalAlpha =

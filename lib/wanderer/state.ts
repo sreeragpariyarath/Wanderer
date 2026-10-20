@@ -1,7 +1,6 @@
 import { createCharacter } from './character';
 import { CAPTIONS, CARDS } from './sceneData';
 import type {
-  BackBuilding,
   Building,
   CloudPoint,
   House,
@@ -58,7 +57,6 @@ export class SceneState {
   puffs: Puff[] = [];
   parts: Particle[] = [];
   buildings: Building[] = [];
-  backgroundBuildings: BackBuilding[] = [];
   mountains: [number, number][][] = [];
   clouds: Array<{ x: number; y: number; pts: CloudPoint[] }> = [];
   seeds: Array<{ x: number; off: number; sp: number }> = [];

@@ -24,7 +24,8 @@ export function renderClouds(
 ): void {
   const { ctx, cam, w, h, col, X } = frame;
   // meadow clouds
-  const cloudA = 1 - smoothStep(6400, 6900, X);
+  // The city has its own still clouds; these drifting ones take over after it.
+  const cloudA = (1 - smoothStep(6400, 6900, X)) * smoothStep(3000, 3900, X);
   if (cloudA > 0)
     for (const cl of s.clouds) {
       const sx = cl.x - cam * 0.5 + Math.sin(s.time * 0.1 + cl.x) * 20;

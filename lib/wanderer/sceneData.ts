@@ -6,8 +6,16 @@ import { WORLD } from './config';
 
 const DEFAULT_CAPTIONS: readonly Caption[] = [
   {
-    x: 480,
-    en: 'The city wakes before you do.',
+    x: 70,
+    en: 'The city wakes before you do. One window is already lit.',
+  },
+  {
+    x: 640,
+    en: 'Sreerag P. Full stack developer.',
+  },
+  {
+    x: 1250,
+    en: 'The road starts here.',
   },
   {
     x: 3700,
@@ -32,6 +40,15 @@ const DEFAULT_CAPTIONS: readonly Caption[] = [
 ];
 
 const DEFAULT_CARDS: readonly SceneCard[] = [
+  {
+    x: 640,
+    en: [
+      'Hello · Full stack developer',
+      'Hello, I am Sreerag',
+      'I build the parts of an app you never see, and make sure they hold.',
+      'Full stack developer in Indore, with a year of shipping real work: backends, admin panels and apps people use, including a learning app for children, live on Google Play and the App Store. I work in MERN, NestJS and TypeScript, from billing and permissions to deployment. Stack: MongoDB, Express, React, Node.js, NestJS, TypeScript.',
+    ],
+  },
   {
     x: 5100,
     en: [

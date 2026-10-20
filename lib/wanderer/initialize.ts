@@ -65,22 +65,6 @@ export function createScene(): SceneState {
     bx += bw + 8 + seededRandom(bi * 7 + 7) * 26;
     bi++;
   }
-  s.backgroundBuildings = [];
-  bx = 400;
-  bi = 0;
-  while (bx < 4600) {
-    const bw = 70 + seededRandom(bi * 5 + 500) * 110,
-      bh = 230 + seededRandom(bi * 5 + 501) * 240;
-    s.backgroundBuildings.push({
-      x: bx,
-      w: bw,
-      h: bh,
-      c: ['#c3c8ce', '#d0cac0', '#b8c1c9', '#cbc2b4'][bi % 4],
-      seed: bi * 17 + 900,
-    });
-    bx += bw + seededRandom(bi * 5 + 502) * 22;
-    bi++;
-  }
   s.mountains = [0, 1].map((L) =>
     Array.from({ length: 24 }, (_, k) => [
       700 + k * 150 + L * 70,
