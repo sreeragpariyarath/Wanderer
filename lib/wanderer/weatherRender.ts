@@ -122,7 +122,7 @@ export function renderRain(
   if (rainA > 0) {
     ctx.save();
     ctx.strokeStyle = s.rainColor;
-    ctx.lineWidth = 1.2;
+    ctx.lineWidth = 1;
     const n = Math.floor(s.rain.length * rainA);
     for (let j = 0; j < n; j++) {
       const r = s.rain[j];
@@ -133,10 +133,11 @@ export function renderRain(
             80) %
             (w + 80)) -
           40;
-      ctx.globalAlpha = rainA * (0.35 + r.sp * 0.35);
+      ctx.globalAlpha = rainA * (0.25 + r.sp * 0.25);
       ctx.beginPath();
       ctx.moveTo(x, y);
-      ctx.lineTo(x - 2.5, y + 12 + r.sp * 8);
+      // Long, softly slanted streaks like the design's rain.
+      ctx.lineTo(x - 5, y + 16 + r.sp * 12);
       ctx.stroke();
     }
     ctx.lineWidth = 1;
@@ -149,7 +150,27 @@ export function renderRain(
       if (sx < -20 || sx > w + 20) continue;
       ctx.globalAlpha = rainA * (1 - life) * 0.7;
       ctx.beginPath();
-      ctx.ellipse(sx, SY(76), 2 + life * 12, 1 + life * 3, 0, 0, 7);
+      ctx.ellipse(
+        sx,
+        SY(WORLD.waterY + 1),
+        2 + life * 12,
+        1 + life * 3,
+        0,
+        0,
+        7,
+      );
+      ctx.stroke();
+      ctx.globalAlpha = rainA * (1 - life) * 0.35;
+      ctx.beginPath();
+      ctx.ellipse(
+        sx,
+        SY(WORLD.waterY + 1),
+        1 + life * 6,
+        0.5 + life * 1.5,
+        0,
+        0,
+        7,
+      );
       ctx.stroke();
     }
     ctx.restore();

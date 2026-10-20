@@ -53,8 +53,9 @@ export function dotDome(
   colors: readonly [string, string],
   alphas: readonly [number, number],
   warmShare: number,
+  gap = 9,
+  size = 1.3,
 ): void {
-  const gap = 9;
   for (let row = 0; row * gap < ry; row++) {
     const y = baseY - row * gap,
       reach = rx * Math.sqrt(1 - Math.pow((row * gap) / ry, 2));
@@ -62,7 +63,7 @@ export function dotDome(
       const warm = seededRandom(seed + row * 61 + x) < warmShare;
       ctx.globalAlpha = warm ? alphas[1] : alphas[0];
       ctx.fillStyle = warm ? colors[1] : colors[0];
-      dot(ctx, cx + x, y, 1.3);
+      dot(ctx, cx + x, y, size);
     }
   }
 }

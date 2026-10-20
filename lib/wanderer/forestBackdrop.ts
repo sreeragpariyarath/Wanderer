@@ -1,5 +1,12 @@
+import { WORLD } from './config';
 import { dot, dotDome, dotLine, withAlpha } from './dots';
 import type { Frame } from './frame';
+import {
+  renderHaze,
+  renderMistLayer,
+  type MistLayer,
+  type MistPalette,
+} from './mist';
 import { seededRandom, smoothStep } from './math';
 import type { RenderState } from './state';
 import { terrainHeight } from './terrain';
@@ -10,8 +17,10 @@ type ForestScenery = Pick<
 >;
 
 const FOREST_START = 3450;
-const FOREST_END = 6650;
+// The forest floor carries on past the trees, up to the start of the bridge.
+const FOREST_END = WORLD.bridgeStart - 10;
 const SAGE = ['#a9c2ad', '#8fb39a', '#7fa9a0'] as const;
+const FOREST_MIST: MistPalette = { leaves: SAGE, trunk: '#b9a896' };
 const LEAF = ['#2c5236', '#3d6e48', '#4f8a5b', '#6f9a78'] as const;
 
 function forestVisibility(X: number): number {
@@ -38,83 +47,6 @@ function renderSun(frame: Frame, fade: number): void {
   dot(ctx, x, y, radius);
 }
 
-function renderHaze(
-  frame: Frame,
-  gy: number,
-  strength: number,
-  depth = 0.55,
-): void {
-  const { ctx, w, h, col } = frame,
-    top = gy - h * depth,
-    haze = ctx.createLinearGradient(0, top, 0, gy);
-  haze.addColorStop(0, withAlpha(col.bg, 0));
-  haze.addColorStop(1, withAlpha(col.bg, strength));
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = haze;
-  ctx.fillRect(0, top, w, gy - top);
-}
-
-// A soft, natural misty tree: dots spread by dart throwing (no grid pattern)
-// on a pale trunk with one fork.
-function renderMistTree(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  ground: number,
-  radius: number,
-  trunk: number,
-  seed: number,
-  alpha: number,
-  cheap: boolean,
-): void {
-  const centerY = ground - trunk - radius * 0.75,
-    forkY = centerY + radius * 0.55;
-  ctx.fillStyle = '#b9a896';
-  ctx.globalAlpha = alpha * 0.8;
-  dotLine(ctx, x, ground, x, forkY, 5, 1, seed);
-  dotLine(ctx, x, forkY, x - radius * 0.35, centerY, 5, 0.8, seed + 1);
-  dotLine(
-    ctx,
-    x,
-    forkY,
-    x + radius * 0.3,
-    centerY - radius * 0.1,
-    5,
-    0.8,
-    seed + 2,
-  );
-  // Sunflower spiral with jitter: evenly spread, organic, and cheap to draw
-  // every frame (no grid pattern and no neighbour checks).
-  const spacing = Math.max(4.2, radius / 6.5),
-    count = Math.round((radius * radius * 3.4) / (spacing * spacing));
-  for (let i = 0; i < count; i++) {
-    const reach =
-        radius *
-        Math.sqrt((i + 0.5) / count) *
-        (0.94 + seededRandom(seed + i) * 0.12),
-      angle = i * 2.39996 + (seededRandom(seed + i * 3) - 0.5) * 0.5,
-      px =
-        Math.cos(angle) * reach +
-        (seededRandom(seed + i * 3 + 1) - 0.5) * spacing * 0.5,
-      py =
-        Math.sin(angle) * reach * 1.1 +
-        (seededRandom(seed + i * 3 + 2) - 0.5) * spacing * 0.5,
-      r = spacing * (0.26 + seededRandom(seed + i * 7) * 0.16);
-    ctx.fillStyle = SAGE[i % SAGE.length];
-    ctx.globalAlpha = alpha * (0.6 + seededRandom(seed + i * 5) * 0.4);
-    // Far layers use slightly smaller dots so they recede into the fog.
-    dot(ctx, x + px, centerY + py, cheap ? r * 0.8 : r);
-  }
-}
-
-interface MistLayer {
-  seed: number;
-  size: number;
-  alpha: number;
-  spacing: readonly [number, number];
-  lift: number;
-  cheap: boolean;
-}
-
 // Far rows sit higher and fainter; the nearest row is small and crisp.
 const MIST_LAYERS: readonly MistLayer[] = [
   {
@@ -123,7 +55,7 @@ const MIST_LAYERS: readonly MistLayer[] = [
     alpha: 0.22,
     spacing: [0.8, 1.4],
     lift: 0.1,
-    cheap: true,
+    small: true,
   },
   {
     seed: 7500,
@@ -131,7 +63,7 @@ const MIST_LAYERS: readonly MistLayer[] = [
     alpha: 0.3,
     spacing: [1, 1.7],
     lift: 0.06,
-    cheap: true,
+    small: true,
   },
   {
     seed: 7600,
@@ -139,7 +71,7 @@ const MIST_LAYERS: readonly MistLayer[] = [
     alpha: 0.4,
     spacing: [1.4, 2.3],
     lift: 0.03,
-    cheap: false,
+    small: false,
   },
   {
     seed: 7700,
@@ -147,39 +79,9 @@ const MIST_LAYERS: readonly MistLayer[] = [
     alpha: 0.55,
     spacing: [2.4, 4],
     lift: 0,
-    cheap: false,
+    small: false,
   },
 ];
-
-function renderMistLayer(
-  frame: Frame,
-  gy: number,
-  fade: number,
-  layer: MistLayer,
-): void {
-  const { ctx, w, h } = frame,
-    [minGap, maxGap] = layer.spacing;
-  let x = -40 + seededRandom(layer.seed) * 60,
-    i = 0;
-  while (x < w + 60) {
-    const id = layer.seed + i * 11,
-      radius = h * layer.size * (0.6 + seededRandom(id)),
-      trunk = radius * (0.8 + seededRandom(id + 1) * 1.1),
-      ground = gy - h * layer.lift * seededRandom(id + 3);
-    renderMistTree(
-      ctx,
-      x,
-      ground,
-      radius,
-      trunk,
-      id,
-      layer.alpha * fade,
-      layer.cheap,
-    );
-    x += radius * (minGap + seededRandom(id + 2) * (maxGap - minGap));
-    i++;
-  }
-}
 
 function renderStillForest(frame: Frame, gy: number, fade: number): void {
   const { ctx, w, h, col } = frame;
@@ -210,13 +112,13 @@ function renderStillForest(frame: Frame, gy: number, fade: number): void {
     MistLayer,
     MistLayer,
   ];
-  renderMistLayer(frame, gy, fade, far);
+  renderMistLayer(frame, gy, fade, far, FOREST_MIST);
   renderHaze(frame, gy, 0.5);
-  renderMistLayer(frame, gy, fade, distant);
+  renderMistLayer(frame, gy, fade, distant, FOREST_MIST);
   renderHaze(frame, gy, 0.45, 0.22);
-  renderMistLayer(frame, gy, fade, middle);
+  renderMistLayer(frame, gy, fade, middle, FOREST_MIST);
   renderHaze(frame, gy, 0.32, 0.14);
-  renderMistLayer(frame, gy, fade, near);
+  renderMistLayer(frame, gy, fade, near, FOREST_MIST);
   renderHaze(frame, gy, 0.18, 0.08);
 }
 
@@ -393,7 +295,7 @@ function renderBush(
 // World-anchored undergrowth and a dark path line in front of the trees.
 export function renderForestUndergrowth(s: ForestScenery, frame: Frame): void {
   const { ctx, cam, w, h, X } = frame,
-    fade = forestVisibility(X);
+    fade = smoothStep(3300, 3900, X) * (1 - smoothStep(8200, 8600, X));
   if (fade <= 0.01) return;
   const k = scaleFor(frame),
     groundAt = (x: number) => frame.SY(terrainHeight(s.character.x, x)) + 2,
@@ -433,7 +335,7 @@ export function renderForestUndergrowth(s: ForestScenery, frame: Frame): void {
   ctx.fillStyle = '#3f3a2e';
   for (let n = firstDot; n <= lastDot; n++) {
     const wx = n * dotStep;
-    if (wx < FOREST_START - 200 || wx > FOREST_END + 40) continue;
+    if (wx < FOREST_START - 200 || wx > FOREST_END) continue;
     const gy = groundAt(wx);
     ctx.globalAlpha = 0.75 * fade;
     dot(ctx, wx - cam, gy, 2.4 * k);

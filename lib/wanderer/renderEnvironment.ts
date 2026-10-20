@@ -1,4 +1,5 @@
 import { renderBridge } from './bridge';
+import { renderBridgeBackdrop, renderBridgeForeground } from './bridgeBackdrop';
 import { renderCity } from './buildings';
 import { renderFigure } from './characterRender';
 import {
@@ -22,6 +23,7 @@ export function renderEnvironment(s: RenderState, frame: Frame): void {
   renderSky(s, frame);
   renderCityBackdrop(s, frame);
   renderForestBackdrop(s, frame);
+  renderBridgeBackdrop(s, frame);
   renderCity(s, ctx, cam, SY, w, col);
   renderCityStreet(s, frame);
   renderStars(s, frame);
@@ -93,4 +95,5 @@ export function renderEnvironment(s: RenderState, frame: Frame): void {
     renderFigure(s, ctx, s.character.x - cam, SY(s.character.y), col);
   if (s.vehicle.in) renderCar(s, ctx, cam, SY, w, col);
   renderWaterOverlay(s, frame);
+  renderBridgeForeground(s, frame);
 }

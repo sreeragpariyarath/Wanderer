@@ -5,7 +5,8 @@ export const WORLD = {
   startX: 70,
   bridgeStart: 7500,
   bridgeEnd: 8300,
-  waterY: 75,
+  // Water surface sits just under the bridge deck, level with the lake.
+  waterY: 30,
   waterStart: 8250,
   waterEnd: 10300,
   wreckX: 9300,

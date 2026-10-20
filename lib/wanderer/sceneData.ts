@@ -26,8 +26,8 @@ const DEFAULT_CAPTIONS: readonly Caption[] = [
     en: 'The bridge ends before the river does.',
   },
   {
-    x: 10000,
-    en: 'Beyond the old boat, the river gives way to shore.',
+    x: 9700,
+    en: 'The shore waits where the river lets go.',
   },
   {
     x: 11550,

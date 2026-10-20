@@ -3,6 +3,7 @@ import { placeCharacter } from './character';
 import { WORLD } from './config';
 import type { Frame } from './frame';
 import { seededRandom, smoothStep } from './math';
+import { renderRiverPlants, renderRiverSand } from './riverbed';
 import type { RenderState } from './state';
 import { terrainHeight } from './terrain';
 
@@ -78,7 +79,7 @@ export function updateSwimming(
 }
 
 export function renderWater(
-  s: Pick<RenderState, 'character' | 'time' | 'waterColor'>,
+  s: Pick<RenderState, 'character' | 'reducedMotion' | 'time' | 'waterColor'>,
   frame: Frame,
 ): void {
   const { ctx, cam, SY, w, h, D } = frame;
@@ -99,48 +100,34 @@ export function renderWater(
   ctx.closePath();
   ctx.clip();
 
-  const water = ctx.createLinearGradient(0, surface, 0, SY(290));
-  water.addColorStop(0, 'rgba(120, 184, 229, 0.48)');
-  water.addColorStop(0.45, 'rgba(53, 133, 196, 0.58)');
-  water.addColorStop(1, 'rgba(24, 83, 146, 0.7)');
+  // Pale like a calm lake while crossing the bridge, deepening at the river.
+  const depth = 0.25 + 0.75 * smoothStep(8050, 8350, s.character.x),
+    water = ctx.createLinearGradient(0, surface, 0, SY(290));
+  water.addColorStop(0, `rgba(186, 224, 244, ${0.6 + 0.15 * depth})`);
+  water.addColorStop(0.35, `rgba(120, 190, 232, ${0.55 + 0.25 * depth})`);
+  water.addColorStop(0.75, `rgba(72, 150, 212, ${0.6 * depth + 0.2})`);
+  water.addColorStop(1, `rgba(52, 124, 196, ${0.7 * depth + 0.2})`);
   ctx.fillStyle = water;
   ctx.fillRect(left, surface, right - left, h - surface);
+  renderLightRays(
+    ctx,
+    cam,
+    left,
+    right,
+    surface,
+    SY(290),
+    depth,
+    s.reducedMotion ? 0 : s.time,
+  );
   renderWreck(ctx, cam, SY);
-
-  for (let wx = 8330; wx < WORLD.waterEnd - 25; wx += 48) {
-    const seed = seededRandom(wx * 0.17);
-    if (seed < 0.22) continue;
-    const baseY = SY(riverBedY(wx));
-    const height = 22 + seed * 42;
-    const sway = Math.sin(s.time * 1.1 + wx * 0.025) * (4 + seed * 4);
-    ctx.strokeStyle = seed > 0.6 ? '#3f866f' : '#5a9975';
-    ctx.lineWidth = 1.4;
-    ctx.globalAlpha = 0.55 + seed * 0.3;
-    ctx.beginPath();
-    ctx.moveTo(wx - cam, baseY);
-    ctx.quadraticCurveTo(
-      wx - cam + sway * 0.35,
-      baseY - height * 0.55,
-      wx - cam + sway,
-      baseY - height,
-    );
-    ctx.stroke();
-    for (let leaf = 0; leaf < 3; leaf++) {
-      const y = baseY - height * (0.35 + leaf * 0.2);
-      ctx.beginPath();
-      ctx.ellipse(
-        wx - cam + sway * (0.25 + leaf * 0.22) + (leaf % 2 ? -4 : 4),
-        y,
-        4.5,
-        1.8,
-        leaf % 2 ? -0.45 : 0.45,
-        0,
-        Math.PI * 2,
-      );
-      ctx.fillStyle = ctx.strokeStyle;
-      ctx.fill();
-    }
-  }
+  renderLakeSurface(
+    ctx,
+    cam,
+    left,
+    right,
+    surface,
+    s.reducedMotion ? 0 : s.time,
+  );
 
   const span = WORLD.waterEnd - WORLD.waterStart - 80;
   for (let index = 0; index < 14; index++) {
@@ -156,12 +143,12 @@ export function renderWater(
       seededRandom(index * 41) * Math.max(0, bed - WORLD.waterY - 24);
     const sx = wx - cam;
     if (sx < left - 20 || sx > right + 20) continue;
-    const size = 3 + seededRandom(index * 73) * 3;
+    const size = 3.6 + seededRandom(index * 73) * 3.4;
     ctx.save();
     ctx.translate(sx, SY(wy));
     ctx.scale(direction, 1);
-    ctx.globalAlpha = 0.58 * (1 - D * 0.2);
-    ctx.fillStyle = index % 3 === 0 ? '#d7a75c' : '#e5edf2';
+    ctx.globalAlpha = 0.8 * (1 - D * 0.2);
+    ctx.fillStyle = ['#5b8fc7', '#f4f7f9', '#e8c46a'][index % 3];
     ctx.beginPath();
     ctx.ellipse(0, 0, size * 1.8, size, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -174,28 +161,25 @@ export function renderWater(
     ctx.restore();
   }
   ctx.restore();
-
-  ctx.fillStyle = s.waterColor;
-  for (
-    let wx = Math.max(VISUAL_START, Math.floor(cam / 7) * 7);
-    wx < Math.min(WORLD.waterEnd, cam + w);
-    wx += 7
-  ) {
-    const edge =
-      smoothStep(VISUAL_START, VISUAL_START + 120, wx) *
-      (1 - smoothStep(WORLD.waterEnd - 120, WORLD.waterEnd, wx));
-    const waveOffset = Math.sin(s.time * 0.65 + wx * 0.018) * 0.75;
-    ctx.globalAlpha = edge * 0.85 * (1 - D * 0.35);
-    ctx.beginPath();
-    ctx.arc(
-      wx - cam,
-      SY(WORLD.waterY + waveOffset),
-      1.8 + seededRandom(wx * 3) * 2.2,
-      0,
-      Math.PI * 2,
+  // The earth cross-section only shows once you are in the river, not while
+  // the calm lake is seen from the bridge.
+  const below = smoothStep(8150, 8400, s.character.x);
+  if (below > 0.01) {
+    ctx.save();
+    ctx.globalAlpha = below;
+    renderRiverSand(ctx, cam, SY, riverBedY, left, right, h, below);
+    renderRiverPlants(
+      ctx,
+      cam,
+      SY,
+      riverBedY,
+      left,
+      right,
+      s.reducedMotion ? 0 : s.time,
     );
-    ctx.fill();
+    ctx.restore();
   }
+
   ctx.globalAlpha = 1;
 }
 
@@ -216,7 +200,7 @@ export function renderWaterOverlay(
     ctx.lineTo(sx, SY(riverBedY(sx + cam)));
   ctx.closePath();
   ctx.clip();
-  ctx.fillStyle = 'rgba(36, 125, 194, 0.2)';
+  ctx.fillStyle = 'rgba(120, 190, 232, 0.12)';
   ctx.fillRect(left, surface, Math.max(0, right - left), h - surface);
   ctx.fillStyle = 'rgba(225, 244, 255, 0.72)';
   for (let index = 0; index < 5; index++) {
@@ -233,6 +217,107 @@ export function renderWaterOverlay(
     ctx.fill();
   }
   ctx.restore();
+}
+
+// Soft beams of light slanting down from the surface, stronger in deep water.
+function renderLightRays(
+  ctx: CanvasRenderingContext2D,
+  cam: number,
+  left: number,
+  right: number,
+  surface: number,
+  floor: number,
+  depth: number,
+  time: number,
+): void {
+  for (let i = 0; i < 9; i++) {
+    const wx =
+        WORLD.bridgeStart + 300 + i * 320 + Math.sin(time * 0.3 + i) * 20,
+      x = wx - cam;
+    if (x < left - 200 || x > right + 60) continue;
+    const width = 40 + seededRandom(i + 9900) * 50,
+      beam = ctx.createLinearGradient(0, surface, 0, floor);
+    beam.addColorStop(0, `rgba(255, 255, 255, ${0.12 + 0.06 * depth})`);
+    beam.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = beam;
+    ctx.beginPath();
+    ctx.moveTo(x, surface);
+    ctx.lineTo(x + width, surface);
+    ctx.lineTo(x + width - 90, floor);
+    ctx.lineTo(x - 130, floor);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+// Light shimmer just under the surface and a few small fish, as in the design.
+function renderLakeSurface(
+  ctx: CanvasRenderingContext2D,
+  cam: number,
+  left: number,
+  right: number,
+  surface: number,
+  time: number,
+): void {
+  const light = ctx.createLinearGradient(0, surface, 0, surface + 70);
+  light.addColorStop(0, 'rgba(214, 232, 244, 0.55)');
+  light.addColorStop(1, 'rgba(214, 232, 244, 0)');
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = light;
+  ctx.fillRect(left, surface, right - left, 70);
+  const band = ctx.createLinearGradient(0, surface, 0, surface + 10);
+  band.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
+  band.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  ctx.fillStyle = band;
+  ctx.fillRect(left, surface, right - left, 10);
+  ctx.fillStyle = '#ffffff';
+  for (let i = 0; i < 160; i++) {
+    const wx =
+        WORLD.bridgeStart +
+        seededRandom(i + 9800) * 3000 +
+        ((time * (i % 2 ? 6 : -4)) % 60) +
+        Math.sin(time * 0.4 + i) * 6,
+      sx = wx - cam;
+    if (sx < left - 40 || sx > right) continue;
+    ctx.globalAlpha =
+      (0.35 + seededRandom(i + 9810) * 0.35) *
+      (0.7 + 0.3 * Math.sin(time * 1.5 + i));
+    ctx.fillRect(
+      sx,
+      surface + 3 + Math.pow(seededRandom(i + 9820), 1.6) * 60,
+      8 + seededRandom(i + 9830) * 26,
+      1.2,
+    );
+  }
+  for (let i = 0; i < 70; i++) {
+    const wx = WORLD.bridgeStart + seededRandom(i + 9890) * 3000,
+      sx = wx - cam;
+    if (sx < left || sx > right) continue;
+    ctx.globalAlpha = Math.max(0, Math.sin(time * 2 + i * 1.7)) * 0.9;
+    ctx.fillRect(sx, surface + 2 + seededRandom(i + 9895) * 14, 2, 2);
+  }
+  for (let i = 0; i < 5; i++) {
+    const speed = 14 + seededRandom(i + 9850) * 12,
+      wx =
+        WORLD.bridgeStart +
+        ((seededRandom(i + 9860) * 1800 + time * speed) % 1800),
+      sx = wx - cam,
+      sy = surface + 30 + seededRandom(i + 9870) * 50 + Math.sin(time + i) * 3;
+    if (sx < left - 20 || sx > right + 20) continue;
+    ctx.globalAlpha = 0.6;
+    ctx.fillStyle = '#6f9fc7';
+    ctx.beginPath();
+    ctx.ellipse(sx, sy, 9, 3.4, 0, 0, 7);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(sx - 8, sy);
+    ctx.lineTo(sx - 14, sy - 4);
+    ctx.lineTo(sx - 14, sy + 4);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
 }
 
 function renderWreck(
