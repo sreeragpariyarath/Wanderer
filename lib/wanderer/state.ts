@@ -2,7 +2,6 @@ import { createCharacter } from './character';
 import { CAPTIONS, CARDS } from './sceneData';
 import type {
   Building,
-  CloudPoint,
   House,
   IntroState,
   IntroTreePoint,
@@ -57,8 +56,6 @@ export class SceneState {
   puffs: Puff[] = [];
   parts: Particle[] = [];
   buildings: Building[] = [];
-  mountains: [number, number][][] = [];
-  clouds: Array<{ x: number; y: number; pts: CloudPoint[] }> = [];
   seeds: Array<{ x: number; off: number; sp: number }> = [];
   rain: Array<{ x: number; y: number; sp: number }> = [];
   stars: Array<{ x: number; y: number; s: number }> = [];

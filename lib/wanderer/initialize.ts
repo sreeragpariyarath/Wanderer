@@ -1,23 +1,21 @@
-import { createCloudPoints } from './clouds';
 import { seededRandom } from './math';
 import { SceneState } from './state';
 import { createTreePoints } from './trees';
 import type { HousePoint } from './types';
 export function createScene(): SceneState {
   const s = new SceneState();
+  // Medium trees with room between them, and one large tree, as in the design.
   s.trees = [
-    [3850, 260, 0],
-    [4080, 340, 3],
-    [4300, 230, 0],
-    [4560, 380, 0],
-    [4800, 290, 3],
-    [5050, 240, 0],
-    [5330, 360, 3],
-    [5580, 270, 0],
-    [5840, 330, 0],
-    [6080, 250, 3],
-    [6330, 300, 0],
-    [6560, 230, 3],
+    [3800, 270, 0],
+    [4090, 300, 3],
+    [4380, 250, 0],
+    [4680, 310, 3],
+    [5050, 420, 0],
+    [5420, 260, 3],
+    [5720, 300, 0],
+    [6020, 240, 3],
+    [6310, 290, 0],
+    [6580, 260, 3],
   ].map(([x, h, t], i) => ({
     x,
     h,
@@ -65,19 +63,6 @@ export function createScene(): SceneState {
     bx += bw + 8 + seededRandom(bi * 7 + 7) * 26;
     bi++;
   }
-  s.mountains = [0, 1].map((L) =>
-    Array.from({ length: 24 }, (_, k) => [
-      700 + k * 150 + L * 70,
-      (k % 2
-        ? 150 + seededRandom(k * 3 + L * 40 + 8000) * 130
-        : 50 + seededRandom(k * 5 + L * 40 + 8100) * 50) * (L ? 1 : 0.7),
-    ]),
-  );
-  s.clouds = [700, 1600, 2600, 3500, 4400, 5300, 6200].map((x, i) => ({
-    x,
-    y: 0.16 + seededRandom(i + 9) * 0.1,
-    pts: createCloudPoints(900 + i * 200),
-  }));
   s.seeds = Array.from({ length: 22 }, (_, i) => ({
     x: 3700 + seededRandom(i + 70) * 900,
     off: seededRandom(i + 90),

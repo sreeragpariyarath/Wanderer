@@ -1,15 +1,17 @@
 import { renderBridge } from './bridge';
 import { renderCity } from './buildings';
 import { renderFigure } from './characterRender';
+import {
+  renderForestBackdrop,
+  renderForestSeeds,
+  renderForestUndergrowth,
+} from './forestBackdrop';
 import { renderCityBackdrop, renderCityStreet } from './cityBackdrop';
-import { renderClouds } from './clouds';
 import type { Frame } from './frame';
 import { renderGround } from './ground';
 import { seededRandom } from './math';
-import { renderMountains } from './mountains';
 import { renderParticleRender } from './particleRender';
 import type { RenderState } from './state';
-import { terrainHeight } from './terrain';
 import { renderTrees } from './trees';
 import { renderCar } from './vehicleRender';
 import { renderVillage } from './village';
@@ -17,35 +19,15 @@ import { renderWater, renderWaterOverlay } from './water';
 import { renderRain, renderSky, renderStars } from './weatherRender';
 export function renderEnvironment(s: RenderState, frame: Frame): void {
   const { ctx, cam, SY, w, h, col, X, nightA } = frame;
-  renderClouds(s, frame);
   renderSky(s, frame);
-  renderMountains(s, frame);
   renderCityBackdrop(s, frame);
+  renderForestBackdrop(s, frame);
   renderCity(s, ctx, cam, SY, w, col);
   renderCityStreet(s, frame);
   renderStars(s, frame);
   renderTrees(s, frame);
-  // seeds
-  for (const seed of s.seeds) {
-    const life = (s.time * seed.sp * 0.08 + seed.off) % 1;
-    const sx = seed.x - cam + Math.sin(s.time + seed.off * 9) * 18 + life * 60;
-    if (sx < -20 || sx > w + 20) continue;
-    const sy = SY(terrainHeight(s.character.x, seed.x)) - 20 - life * h * 0.55;
-    ctx.globalAlpha = Math.sin(life * Math.PI) * 0.8;
-    ctx.strokeStyle = col.mut;
-    ctx.lineWidth = 0.8;
-    ctx.beginPath();
-    ctx.moveTo(sx, sy);
-    ctx.lineTo(sx - 2, sy + 10);
-    ctx.stroke();
-    for (let k = 0; k < 7; k++) {
-      const a = -Math.PI / 2 + (k - 3) * 0.38;
-      ctx.beginPath();
-      ctx.moveTo(sx, sy);
-      ctx.lineTo(sx + Math.cos(a) * 6, sy + Math.sin(a) * 6);
-      ctx.stroke();
-    }
-  }
+  renderForestUndergrowth(s, frame);
+  renderForestSeeds(s, frame);
   renderRain(s, frame);
   renderWater(s, frame);
   renderBridge(s, frame);

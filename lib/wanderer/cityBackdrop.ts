@@ -1,3 +1,4 @@
+import { dot, dotDome, dotLine, withAlpha } from './dots';
 import type { Frame } from './frame';
 import { seededRandom, smoothStep } from './math';
 import type { RenderState } from './state';
@@ -46,42 +47,6 @@ const MID_LAYER: SkylineLayer = {
 };
 const CITY_END = 3900;
 
-function withAlpha(color: string, alpha: number): string {
-  if (color.startsWith('#') && color.length === 7) {
-    const value = parseInt(color.slice(1), 16);
-    return `rgba(${value >> 16},${(value >> 8) & 255},${value & 255},${alpha})`;
-  }
-  return color.replace('rgb(', 'rgba(').replace(')', `,${alpha})`);
-}
-
-function dot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, 7);
-  ctx.fill();
-}
-
-function dotLine(
-  ctx: CanvasRenderingContext2D,
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-  step: number,
-  r: number,
-  seed: number,
-) {
-  const count = Math.max(1, Math.floor(Math.hypot(x2 - x1, y2 - y1) / step));
-  for (let i = 0; i <= count; i++) {
-    const t = i / count;
-    dot(
-      ctx,
-      x1 + (x2 - x1) * t,
-      y1 + (y2 - y1) * t,
-      r * (0.75 + seededRandom(seed + i * 1.7) * 0.5),
-    );
-  }
-}
-
 function cityVisibility(s: CityScenery, X: number): number {
   const reveal = s.introDone ? 1 : Math.min(1, (s.intro.reveal || 0) / 700);
   return (1 - smoothStep(3300, CITY_END, X)) * reveal;
@@ -103,7 +68,6 @@ function renderSun(frame: Frame, accent: string, fade: number): void {
   dot(ctx, x, y, radius);
 }
 
-// A dome built from a grid of dots, like the clouds in the design.
 function renderDomeCloud(
   s: CityScenery,
   frame: Frame,
@@ -114,19 +78,17 @@ function renderDomeCloud(
   seed: number,
   fade: number,
 ): void {
-  const { ctx, col } = frame,
-    gap = 9;
-  for (let row = 0; row * gap < ry; row++) {
-    const y = baseY - row * gap,
-      reach = rx * Math.sqrt(1 - Math.pow((row * gap) / ry, 2));
-    for (let x = -reach; x <= reach; x += gap) {
-      const id = seed + row * 61 + x,
-        warm = seededRandom(id) > 0.55;
-      ctx.globalAlpha = (warm ? 0.42 : 0.22) * fade;
-      ctx.fillStyle = warm ? s.accent : col.dot;
-      dot(ctx, cx + x, y, 1.3);
-    }
-  }
+  dotDome(
+    frame.ctx,
+    cx,
+    baseY,
+    rx,
+    ry,
+    seed,
+    [frame.col.dot, s.accent],
+    [0.22 * fade, 0.42 * fade],
+    0.45,
+  );
 }
 
 function renderSkyline(

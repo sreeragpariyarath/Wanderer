@@ -45,13 +45,6 @@ export interface TreePoint {
   shade?: number;
 }
 
-export interface CloudPoint {
-  x: number;
-  y: number;
-  r: number;
-  c: number;
-}
-
 interface ParticleBase {
   x: number;
   y: number;
