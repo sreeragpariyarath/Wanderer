@@ -6,8 +6,16 @@ import { WORLD } from './config';
 
 const DEFAULT_CAPTIONS: readonly Caption[] = [
   {
-    x: 480,
-    en: 'The city wakes before you do.',
+    x: 70,
+    en: 'The city wakes before you do. One window is already lit.',
+  },
+  {
+    x: 640,
+    en: 'Sreerag P. Full stack developer.',
+  },
+  {
+    x: 1250,
+    en: 'The road starts here.',
   },
   {
     x: 3700,
@@ -18,20 +26,25 @@ const DEFAULT_CAPTIONS: readonly Caption[] = [
     en: 'The bridge ends before the river does.',
   },
   {
-    x: 10000,
-    en: 'Beyond the old boat, the river gives way to shore.',
+    x: 9700,
+    en: 'The shore waits where the river lets go.',
   },
   {
-    x: 11550,
-    en: 'Up, and the light comes back.',
-  },
-  {
-    x: 15700,
-    en: 'The horizon keeps its promise by moving.',
+    x: 11150,
+    en: 'The forest glows where silence grows.',
   },
 ];
 
 const DEFAULT_CARDS: readonly SceneCard[] = [
+  {
+    x: 640,
+    en: [
+      'Hello · Full stack developer',
+      'Hello, I am Sreerag',
+      'I build the parts of an app you never see, and make sure they hold.',
+      'Full stack developer in Indore, with a year of shipping real work: backends, admin panels and apps people use, including a learning app for children, live on Google Play and the App Store. I work in MERN, NestJS and TypeScript, from billing and permissions to deployment. Stack: MongoDB, Express, React, Node.js, NestJS, TypeScript.',
+    ],
+  },
   {
     x: 5100,
     en: [
@@ -59,42 +72,6 @@ const DEFAULT_CARDS: readonly SceneCard[] = [
       'The Quiet Wreck',
       'A broken wooden boat, resting among the river plants.',
       'The hull is split and its mast has fallen, but the river has made a home of it. Small fish shelter between the ribs, and new plants grow through the planks. Pause here, then follow the current toward the shore.',
-    ],
-  },
-  {
-    x: 10600,
-    en: [
-      'Web / Tools / Automation',
-      'Lantern',
-      'Small tools for lighting up repetitive work.',
-      'Experiments and working notes on web development, automation and the quiet tools that make everyday work lighter.',
-    ],
-  },
-  {
-    x: 11100,
-    en: [
-      'Sound / Experiments',
-      'Undertow',
-      'Field recordings and generative sound.',
-      'Rain on tin roofs, harbour bells and patterns that play themselves — collected, layered and left running.',
-    ],
-  },
-  {
-    x: 13000,
-    en: [
-      'Travel / Food / Daily records',
-      'Kitchen Atlas',
-      'Towns and meals, written down as they happened.',
-      'A running record of places eaten in and streets walked through, kept honestly and without stars.',
-    ],
-  },
-  {
-    x: 14800,
-    en: [
-      'Games / Long-running world',
-      'Blockhouse',
-      'A slow build in a world made of cubes.',
-      'One world, played for years: a house, then a village, then a railway to nowhere in particular.',
     ],
   },
 ];

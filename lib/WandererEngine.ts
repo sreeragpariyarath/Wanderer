@@ -133,7 +133,6 @@ export default class WandererEngine {
     for (const event of events) {
       if (event.type === 'vehicle-exit' && event.automatic) this.input.clear();
       if (event.type === 'step') this.audio?.play();
-      else if (event.type === 'launch') this.audio?.play(320, 0.5);
       else if (event.type === 'splash') this.audio?.play(90, 0.25);
       else if (event.type !== 'intro-complete')
         this.audio?.play(event.type === 'landing' ? 120 : 220, 0.15);

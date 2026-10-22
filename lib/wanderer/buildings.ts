@@ -6,7 +6,6 @@ export function renderCity(
   s: Pick<
     RenderState,
     | 'accent'
-    | 'backgroundBuildings'
     | 'buildings'
     | 'character'
     | 'intro'
@@ -24,8 +23,6 @@ export function renderCity(
   const X = s.character.x,
     rv = s.introDone ? 1 : Math.min(1, (s.intro.reveal || 0) / 700);
   if (rv <= 0 || cam > 3900) return;
-  const cityA = 1 - smoothStep(3300, 3900, X),
-    gyB = SY(terrainHeight(s.character.x, X)) + 2;
   const dl = (
     x1: number,
     y1: number,
@@ -53,19 +50,6 @@ export function renderCity(
       ctx.fill();
     }
   };
-  if (cityA > 0) {
-    ctx.fillStyle = col.dot;
-    for (const b of s.backgroundBuildings) {
-      const sx = b.x - cam * 0.55;
-      if (sx > w + 10 || sx + b.w < -10) continue;
-      const H = Math.min(b.h, gyB - 130),
-        top = gyB - H;
-      ctx.globalAlpha = 0.28 * cityA * rv;
-      dl(sx, gyB, sx, top, 9, 1.3, b.seed);
-      dl(sx, top, sx + b.w, top, 9, 1.3, b.seed + 50);
-      dl(sx + b.w, top, sx + b.w, gyB, 9, 1.3, b.seed + 99);
-    }
-  }
   for (const b of s.buildings) {
     const sx = b.x - cam;
     if (sx > w + 20 || sx + b.w < -40) continue;
@@ -78,6 +62,10 @@ export function renderCity(
     const top = gy - H,
       hue = s.villageColors[b.seed % 5],
       cols = [hue, hue, col.mut];
+    // Opaque base so the frozen backdrop never shows through a building.
+    ctx.globalAlpha = 0.94 * rv;
+    ctx.fillStyle = col.bg;
+    ctx.fillRect(sx, top, b.w, H);
     ctx.globalAlpha = 0.8 * rv;
     dl(sx, gy, sx, top, 7, 1.6, b.seed, cols);
     dl(sx + b.w, gy, sx + b.w, top, 7, 1.6, b.seed + 40, cols);

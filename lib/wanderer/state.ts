@@ -1,10 +1,7 @@
 import { createCharacter } from './character';
 import { CAPTIONS, CARDS } from './sceneData';
 import type {
-  BackBuilding,
   Building,
-  CloudPoint,
-  House,
   IntroState,
   IntroTreePoint,
   NumericPalette,
@@ -29,7 +26,7 @@ export class SceneState {
   camera = { x: -330, y: -150 };
   reducedMotion = false;
   cardOpacity = 0;
-  worldWidth = 16000;
+  worldWidth = 13700;
   captions = CAPTIONS;
   cards = CARDS;
   time = 0;
@@ -58,15 +55,10 @@ export class SceneState {
   puffs: Puff[] = [];
   parts: Particle[] = [];
   buildings: Building[] = [];
-  backgroundBuildings: BackBuilding[] = [];
-  mountains: [number, number][][] = [];
-  clouds: Array<{ x: number; y: number; pts: CloudPoint[] }> = [];
   seeds: Array<{ x: number; off: number; sp: number }> = [];
   rain: Array<{ x: number; y: number; sp: number }> = [];
   stars: Array<{ x: number; y: number; s: number }> = [];
   villageColors: string[] = [];
-  houses: House[] = [];
-  ridges: [number, number][][] = [];
   dayPalette: NumericPalette = defaultPalette();
   darkPalette: NumericPalette = defaultPalette();
   nightPalette: NumericPalette = defaultPalette();

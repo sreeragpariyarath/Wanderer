@@ -15,7 +15,19 @@ export interface Frame {
   D: number;
   N: number;
   nightA: number;
+  /**
+   * Draws a still layer through the renderer's offscreen cache: drawn once per
+   * id and screen size, then composited with an alpha and a vertical offset.
+   * Absent outside the browser renderer; callers then draw directly.
+   */
+  layer?: LayerPainter;
 }
+export type LayerPainter = (
+  id: string,
+  draw: (ctx: CanvasRenderingContext2D) => void,
+  alpha: number,
+  offsetY: number,
+) => void;
 export function createFrame(
   s: RenderState,
   ctx: CanvasRenderingContext2D,

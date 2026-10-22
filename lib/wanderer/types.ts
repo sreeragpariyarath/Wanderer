@@ -45,13 +45,6 @@ export interface TreePoint {
   shade?: number;
 }
 
-export interface CloudPoint {
-  x: number;
-  y: number;
-  r: number;
-  c: number;
-}
-
 interface ParticleBase {
   x: number;
   y: number;
@@ -127,14 +120,6 @@ export interface Building {
   roof: number;
   shop: boolean;
   aw: string;
-  seed: number;
-}
-
-export interface BackBuilding {
-  x: number;
-  w: number;
-  h: number;
-  c: string;
   seed: number;
 }
 

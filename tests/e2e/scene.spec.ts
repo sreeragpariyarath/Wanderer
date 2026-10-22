@@ -38,7 +38,7 @@ test('every visit starts from the beginning with sound off', async ({
 }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  await start(page, 'Shore');
+  await start(page, 'River');
   await expect(page.getByRole('group', { name: 'Language' })).toHaveCount(0);
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await page.getByRole('button', { name: 'Enable sound' }).click();
@@ -62,8 +62,8 @@ test('checkpoint bar jumps to a section and tracks the current one', async ({
 }) => {
   await start(page);
   const bar = page.getByRole('navigation', { name: 'Checkpoints' });
-  await expect(bar.getByRole('button')).toHaveCount(7);
-  for (const name of ['Forest', 'Island', 'City']) {
+  await expect(bar.getByRole('button')).toHaveCount(5);
+  for (const name of ['Forest', 'Grove', 'City']) {
     await bar.getByRole('button', { name }).click();
     await expect(bar.getByRole('button', { name })).toHaveAttribute(
       'aria-current',
@@ -116,7 +116,7 @@ test('river exposes vertical swim controls and reaches the far bank', async ({
 test('story opens with pointer and keyboard; repeat does not toggle; stays within viewport', async ({
   page,
 }) => {
-  await start(page, 'Shore');
+  await start(page, 'Bridge');
   const card = page.locator('.story-card');
   await card.getByRole('button', { name: /Read story/ }).click();
   await expect(card.getByRole('button', { name: 'Close' })).toBeVisible();

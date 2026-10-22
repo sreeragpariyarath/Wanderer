@@ -17,15 +17,11 @@ describe('checkpoints', () => {
     [6688, 1],
     [7188, 2],
     [8500, 3],
-    [10400, 4],
-    [10320, 4],
-    [13000, 5],
-    [14500, 6],
+    [10400, 3],
   ])('position %s reaches checkpoint %s', (x, index) =>
     expect(checkpointIndex(x)).toBe(index),
   );
-  it('treats the launch gap and river as the previous safe bank', () => {
-    expect(safePosition(13850)).toBe(13790);
+  it('treats the river as the nearest safe bank', () => {
     expect(safePosition(8400)).toBe(8200);
     expect(safePosition(10000)).toBe(10320);
   });

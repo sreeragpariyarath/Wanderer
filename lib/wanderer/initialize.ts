@@ -1,23 +1,20 @@
-import { createCloudPoints } from './clouds';
 import { seededRandom } from './math';
 import { SceneState } from './state';
 import { createTreePoints } from './trees';
-import type { HousePoint } from './types';
 export function createScene(): SceneState {
   const s = new SceneState();
+  // Medium trees with room between them, and one large tree, as in the design.
   s.trees = [
-    [3850, 260, 0],
-    [4080, 340, 3],
-    [4300, 230, 0],
-    [4560, 380, 0],
-    [4800, 290, 3],
-    [5050, 240, 0],
-    [5330, 360, 3],
-    [5580, 270, 0],
-    [5840, 330, 0],
-    [6080, 250, 3],
-    [6330, 300, 0],
-    [6560, 230, 3],
+    [3800, 270, 0],
+    [4090, 300, 3],
+    [4380, 250, 0],
+    [4680, 310, 3],
+    [5050, 420, 0],
+    [5420, 260, 3],
+    [5720, 300, 0],
+    [6020, 240, 3],
+    [6310, 290, 0],
+    [6580, 260, 3],
   ].map(([x, h, t], i) => ({
     x,
     h,
@@ -65,35 +62,6 @@ export function createScene(): SceneState {
     bx += bw + 8 + seededRandom(bi * 7 + 7) * 26;
     bi++;
   }
-  s.backgroundBuildings = [];
-  bx = 400;
-  bi = 0;
-  while (bx < 4600) {
-    const bw = 70 + seededRandom(bi * 5 + 500) * 110,
-      bh = 230 + seededRandom(bi * 5 + 501) * 240;
-    s.backgroundBuildings.push({
-      x: bx,
-      w: bw,
-      h: bh,
-      c: ['#c3c8ce', '#d0cac0', '#b8c1c9', '#cbc2b4'][bi % 4],
-      seed: bi * 17 + 900,
-    });
-    bx += bw + seededRandom(bi * 5 + 502) * 22;
-    bi++;
-  }
-  s.mountains = [0, 1].map((L) =>
-    Array.from({ length: 24 }, (_, k) => [
-      700 + k * 150 + L * 70,
-      (k % 2
-        ? 150 + seededRandom(k * 3 + L * 40 + 8000) * 130
-        : 50 + seededRandom(k * 5 + L * 40 + 8100) * 50) * (L ? 1 : 0.7),
-    ]),
-  );
-  s.clouds = [700, 1600, 2600, 3500, 4400, 5300, 6200].map((x, i) => ({
-    x,
-    y: 0.16 + seededRandom(i + 9) * 0.1,
-    pts: createCloudPoints(900 + i * 200),
-  }));
   s.seeds = Array.from({ length: 22 }, (_, i) => ({
     x: 3700 + seededRandom(i + 70) * 900,
     off: seededRandom(i + 90),
@@ -110,103 +78,74 @@ export function createScene(): SceneState {
     s: seededRandom(i + 1200),
   }));
   s.villageColors = ['#5f8fa0', '#c0725e', '#9a9a9a', '#d9a35b', '#7fa9a0'];
-  s.houses = [
-    [12300, 0],
-    [12560, 0],
-    [12850, 1],
-    [13180, 0],
-    [13450, 0],
-  ].map(([hx, type], hi) => {
-    const pts: HousePoint[] = [],
-      wins: [number, number, boolean?][] = [];
-    const dashLine = (
-      x1: number,
-      y1: number,
-      x2: number,
-      y2: number,
-      step: number,
-      horiz: boolean,
-    ) => {
-      const d = Math.hypot(x2 - x1, y2 - y1),
-        n = Math.max(1, Math.floor(d / step));
-      for (let i = 0; i <= n; i++) {
-        const t = i / n,
-          k = pts.length;
-        pts.push({
-          x: x1 + (x2 - x1) * t,
-          y: y1 + (y2 - y1) * t,
-          len: horiz ? 9 : 6,
-          horiz,
-          c: s.villageColors[Math.floor(seededRandom(hi * 997 + k) * 4)],
-          s: seededRandom(hi * 331 + k),
-          a: seededRandom(hi * 113 + k) * 6.28,
-        });
-      }
-    };
-    if (type === 0) {
-      const hw = 55 + seededRandom(hi) * 20,
-        hh = 70 + seededRandom(hi + 5) * 25,
-        rh = 40;
-      dashLine(-hw, 0, -hw, -hh, 7, true);
-      dashLine(hw, 0, hw, -hh, 7, true);
-      dashLine(-hw - 12, -hh, 0, -hh - rh, 8, false);
-      dashLine(0, -hh - rh, hw + 12, -hh, 8, false);
-      dashLine(-12, 0, -12, -32, 7, true);
-      dashLine(12, 0, 12, -32, 7, true);
-      wins.push([-hw * 0.6, -hh * 0.55], [hw * 0.6, -hh * 0.55]);
-    } else {
-      const hw = 30,
-        hh = 230;
-      dashLine(-hw, 0, -hw, -hh, 7, true);
-      dashLine(hw, 0, hw, -hh, 7, true);
-      dashLine(-hw - 10, -hh, 0, -hh - 36, 7, false);
-      dashLine(0, -hh - 36, hw + 10, -hh, 7, false);
-      wins.push([0, -hh + 14, true]);
-    }
-    return { x: hx, pts, wins };
-  });
-  s.ridges = [0, 1].map((L) =>
-    Array.from({ length: 30 }, (_, k) => [
-      k * 150,
-      -(k % 2
-        ? 140 + seededRandom(k + L * 50) * 90
-        : 30 + seededRandom(k + 9 + L * 50) * 40) * (L ? 0.7 : 1),
-    ]),
-  );
 
   const SWX = -330,
     LEDGE = -150,
     PIV = LEDGE - 215;
+  // The intro tree, as in the design: a thick pebbled trunk that leans and
+  // curves to the right, a long limb out to the swing, and a wide, loose
+  // crown spreading over both.
   s.introTree = [];
-  for (let i = 0; i < 60; i++) {
-    const u = seededRandom(i + 4000);
-    s.introTree.push({
-      x: SWX - 110 + (seededRandom(i + 4100) - 0.5) * 9,
-      yy: PIV + u * (LEDGE - PIV),
-      r: 1.3 + seededRandom(i + 4200) * 2,
-      t: 1,
-      c: 0,
-    });
+  const baseX = SWX - 210,
+    forkX = SWX - 150,
+    forkY = LEDGE - 230;
+  // Trunk: tidy rows of round pebbles across a smooth curve, tapering up.
+  for (let i = 0; i <= 46; i++) {
+    const t = i / 46,
+      cx =
+        (1 - t) * (1 - t) * baseX +
+        2 * (1 - t) * t * (baseX - 10) +
+        t * t * forkX,
+      cy = LEDGE + (forkY - LEDGE) * t,
+      half = 13 * (1 - t) + 5,
+      lanes = Math.max(2, Math.round(half / 3.4)),
+      shift = i % 2 ? 0.5 : 0;
+    for (let k = 0; k < lanes; k++) {
+      const u = (k + shift) / lanes - 0.5;
+      s.introTree.push({
+        x: cx + u * half * 2,
+        yy: cy + (seededRandom(i * 7 + k + 4100) - 0.5) * 1.5,
+        r: 2.6 + seededRandom(i * 7 + k + 4200) * 0.9 - t * 0.6,
+        t: 1,
+        c: 0,
+      });
+    }
   }
-  for (let i = 0; i < 30; i++) {
-    const u = i / 29;
+  // Limbs: one long arm to the swing pivot, a few shorter ones into the crown.
+  for (const [n, [tx, ty, w]] of [
+    [SWX, PIV, 7],
+    [SWX - 330, LEDGE - 300, 3.5],
+    [SWX - 150, LEDGE - 340, 3.5],
+    [SWX - 30, LEDGE - 320, 3],
+  ].entries())
+    for (let i = 0; i <= 50; i++) {
+      const u = i / 50,
+        bow = Math.sin(u * Math.PI) * (n === 0 ? -26 : -14);
+      s.introTree.push({
+        x:
+          forkX +
+          (tx - forkX) * u +
+          (seededRandom(i + n * 97 + 4300) - 0.5) * 2,
+        yy: forkY + (ty - forkY) * u + bow,
+        r: w * (1 - u * 0.6) * (0.5 + seededRandom(i + n * 97 + 4400) * 0.3),
+        t: 1,
+        c: 0,
+      });
+    }
+  // Wide, loose crown: dense in the middle and scattered at the edges.
+  const crownX = SWX - 160,
+    crownY = LEDGE - 330;
+  for (let i = 0; i < 1500; i++) {
+    const a = seededRandom(i + 4500) * Math.PI * 2,
+      rr = Math.pow(seededRandom(i + 4600), 0.62),
+      x = crownX + Math.cos(a) * rr * 250,
+      y = crownY + Math.sin(a) * rr * 120 + (Math.cos(a) * rr > 0 ? 10 : 0);
     s.introTree.push({
-      x: SWX - 110 + u * 150,
-      yy: PIV - Math.sin(u * 3) * 5 + (seededRandom(i + 4300) - 0.5) * 3,
-      r: 1.2 + seededRandom(i + 4400) * 1.5,
-      t: 1,
-      c: 0,
-    });
-  }
-  for (let i = 0; i < 320; i++) {
-    const an = seededRandom(i + 4500) * 6.28,
-      rr = Math.sqrt(seededRandom(i + 4600));
-    s.introTree.push({
-      x: SWX - 50 + Math.cos(an) * rr * 120,
-      yy: PIV - 18 + Math.sin(an) * rr * 40,
-      r: 1.3 + seededRandom(i + 4700) * 2.6,
+      x,
+      yy: y,
+      r: 1.2 + seededRandom(i + 4700) * 3.4 * (1 - rr * 0.5),
       t: 0,
-      c: seededRandom(i + 4800),
+      c: seededRandom(i + 4800) * 0.5 + (y - (crownY - 120)) / 480,
     });
   }
   s.introDots = Array.from({ length: 70 }, (_, i) => ({

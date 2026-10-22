@@ -4,16 +4,14 @@ The portfolio should feel discovered through the existing world, not displayed a
 
 ## Narrative flow
 
-| World chapter | Portfolio chapter           | In-world treatment                                                                                |
-| ------------- | --------------------------- | ------------------------------------------------------------------------------------------------- |
-| City          | Identity and introduction   | Name and role appear in scenery; a nearby discovery gives the short About text.                   |
-| Road          | One year of experience      | Roadside milestones reveal company, role, dates, and outcomes while the car advances the journey. |
-| Forest        | Skills                      | Technology groups become trail markers and one optional detail card.                              |
-| Bridge        | Featured project            | The crossing frames the primary case study: problem, contribution, architecture, and result.      |
-| River wreck   | Engineering story           | A failure, difficult bug, performance issue, or lesson is attached to the wreck.                  |
-| Shore         | More projects               | Two optional discoveries expose project details and real links.                                   |
-| Village       | Education and collaboration | Houses represent education, certifications, teamwork, and community work.                         |
-| Island        | Contact                     | The finale offers email, résumé, GitHub, LinkedIn, and a journey restart.                         |
+| World chapter | Portfolio chapter         | In-world treatment                                                                                |
+| ------------- | ------------------------- | ------------------------------------------------------------------------------------------------- |
+| City          | Identity and introduction | Name and role appear in scenery; a nearby discovery gives the short About text.                   |
+| Road          | One year of experience    | Roadside milestones reveal company, role, dates, and outcomes while the car advances the journey. |
+| Forest        | Skills                    | Technology groups become trail markers and one optional detail card.                              |
+| Bridge        | Featured project          | The crossing frames the primary case study: problem, contribution, architecture, and result.      |
+| River wreck   | Engineering story         | A failure, difficult bug, performance issue, or lesson is attached to the wreck.                  |
+| Beach         | More projects and contact | The beach after the river holds the remaining projects, education, and the contact finale.        |
 
 Exact positions and required/optional slots are defined in `lib/portfolio/flow.ts`.
 

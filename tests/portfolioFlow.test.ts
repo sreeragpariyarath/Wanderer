@@ -22,9 +22,6 @@ describe('portfolio world flow', () => {
       'Forest',
       'Bridge',
       'River',
-      'Shore',
-      'Village',
-      'Island',
     ];
     expect(new Set(PORTFOLIO_FLOW.map(({ zone }) => zone))).toEqual(
       new Set(zones),

@@ -11,7 +11,8 @@ export function updateWeather(
   reduced: boolean,
 ): void {
   const target = carStarted
-    ? smoothStep(900, 1250, playerX) * (1 - smoothStep(6400, 6680, playerX))
+    ? // Night falls only over the city drive; dawn returns as the forest begins.
+      smoothStep(900, 1250, playerX) * (1 - smoothStep(2700, 3700, playerX))
     : 0;
   s.nightIntensity += (target - s.nightIntensity) * (1 - Math.exp(-1.2 * dt));
   if (

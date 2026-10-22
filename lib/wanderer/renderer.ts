@@ -5,6 +5,7 @@ import type { RenderState } from './state';
 /** Browser resources belong to the renderer, never to simulation state. */
 export class SceneRenderer {
   private introCanvas: HTMLCanvasElement | null = null;
+  private layers = new Map<string, HTMLCanvasElement>();
   render(s: RenderState, canvas: HTMLCanvasElement): Frame | null {
     const w = canvas.clientWidth,
       h = canvas.clientHeight;
@@ -22,6 +23,33 @@ export class SceneRenderer {
     ctx.clearRect(0, 0, w, h);
     const frame = createFrame(s, ctx, w, h),
       { cam, SY, col } = frame;
+    frame.layer = (id, draw, alpha, offsetY) => {
+      // Key on a coarse brightness bucket of the background, so a day/night
+      // fade redraws a cached layer only a few times rather than every frame.
+      const levels = col.bg.match(/d+/g)?.map(Number) ?? [0],
+        tone = Math.round(
+          levels.reduce((sum, v) => sum + v, 0) / levels.length / 64,
+        ),
+        key = `${id}:${pw}x${ph}:${tone}`;
+      let layer = this.layers.get(key);
+      if (!layer) {
+        for (const old of this.layers.keys())
+          if (old.startsWith(`${id}:`)) this.layers.delete(old);
+        layer = document.createElement('canvas');
+        layer.width = pw;
+        layer.height = ph;
+        const o = layer.getContext('2d');
+        if (!o) return;
+        o.setTransform(dpr, 0, 0, dpr, 0, 0);
+        draw(o);
+        this.layers.set(key, layer);
+      }
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, Math.round(offsetY * dpr));
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(layer, 0, 0);
+      ctx.restore();
+    };
     const fade =
       s.intro.landT == null
         ? 1
@@ -67,5 +95,6 @@ export class SceneRenderer {
   }
   dispose(): void {
     this.introCanvas = null;
+    this.layers.clear();
   }
 }

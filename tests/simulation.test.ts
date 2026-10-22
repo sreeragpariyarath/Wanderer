@@ -3,21 +3,16 @@ import {
   createCharacter,
   placeCharacter,
   updateCharacter,
-  type SceneEvent,
 } from '../lib/wanderer/character';
 import { FixedClock } from '../lib/wanderer/clock';
 import { STEP, WORLD } from '../lib/wanderer/config';
 import { createScene } from '../lib/wanderer/initialize';
 import { InputState } from '../lib/wanderer/input';
 import { advanceIntro, completeIntro } from '../lib/wanderer/loading';
-import {
-  emitSplash,
-  ParticleEmitter,
-  updateParticles,
-} from '../lib/wanderer/particles';
+import { emitSplash, updateParticles } from '../lib/wanderer/particles';
 import { darknessAt, terrainHeight } from '../lib/wanderer/terrain';
 import { SceneSimulation } from '../lib/wanderer/simulation';
-import type { Particle, Puff } from '../lib/wanderer/types';
+import type { Particle } from '../lib/wanderer/types';
 import {
   canEnterVehicle,
   interactVehicle,
@@ -29,15 +24,15 @@ import { updateWeather } from '../lib/wanderer/weather';
 describe('character physics', () => {
   it('walks, runs, reverses and follows slopes', () => {
     const c = createCharacter();
-    placeCharacter(c, 11000);
+    placeCharacter(c, 2000);
     for (let i = 0; i < 60; i++)
       updateCharacter(c, { direction: 1, run: false }, STEP);
     expect(c.velocityX).toBeCloseTo(170, 0);
-    const walked = c.x - 11000;
-    placeCharacter(c, 11000);
+    const walked = c.x - 2000;
+    placeCharacter(c, 2000);
     for (let i = 0; i < 60; i++)
       updateCharacter(c, { direction: 1, run: true }, STEP);
-    expect(c.x - 11000).toBeGreaterThan(walked * 2);
+    expect(c.x - 2000).toBeGreaterThan(walked * 2);
     expect(c.y).toBeCloseTo(terrainHeight(c.x, c.x));
     for (let i = 0; i < 60; i++)
       updateCharacter(c, { direction: -1, run: false }, STEP);
@@ -72,45 +67,6 @@ describe('character physics', () => {
       expect(c.mode).toBe('swimming');
     },
   );
-  it('launches through ascent, apex and descent before landing on the island', () => {
-    const c = createCharacter();
-    placeCharacter(c, 13799);
-    c.velocityX = 170;
-    let events: SceneEvent[] = [];
-    let descended = false,
-      minimumY = c.y;
-    for (let i = 0; i < 240; i++) {
-      events = events.concat(
-        updateCharacter(c, { direction: i === 0 ? 1 : -1, run: false }, STEP),
-      );
-      minimumY = Math.min(minimumY, c.y);
-      if (c.mode === 'scripted-launch') {
-        expect(c.velocityX).toBe(160);
-        expect(c.facing).toBe(1);
-        if (c.velocityY > 0) descended = true;
-      }
-      if (events.some((e) => e.type === 'landing')) break;
-    }
-    expect(events.filter((e) => e.type === 'launch')).toHaveLength(1);
-    expect(events.filter((e) => e.type === 'landing')).toHaveLength(1);
-    expect(descended).toBe(true);
-    expect(c.x).toBeGreaterThan(WORLD.islandStart);
-    expect(minimumY).toBeLessThan(c.y - 100);
-    expect(c.velocityY).toBe(0);
-  });
-  it('falls safely when backtracking off the island', () => {
-    const c = createCharacter();
-    placeCharacter(c, 13945);
-    c.velocityX = -170;
-    let airborne = false;
-    for (let i = 0; i < 240; i++) {
-      updateCharacter(c, { direction: -1, run: false }, STEP);
-      if (c.mode === 'airborne') airborne = true;
-    }
-    expect(airborne).toBe(true);
-    expect(c.mode).toBe('grounded');
-    expect(c.y).toBeCloseTo(terrainHeight(c.x, c.x));
-  });
   it.each([
     [WORLD.minX, -1],
     [WORLD.maxX, 1],
@@ -224,9 +180,8 @@ describe('river swimming', () => {
   });
 
   it('keeps the river and shore in daylight', () => {
-    for (const x of [8400, WORLD.wreckX, WORLD.waterEnd, 11000])
+    for (const x of [8400, WORLD.wreckX, WORLD.waterEnd, WORLD.maxX])
       expect(darknessAt(x)).toBe(0);
-    expect(darknessAt(14500)).toBe(1);
   });
   it('can swim back into the river from the shore without walking on the bed', () => {
     const scene = createScene();
@@ -339,20 +294,6 @@ describe('effects', () => {
       emitSplash(parts, { type: 'splash', x: 8400, y: 75 }, () => 0.5);
     expect(parts.length).toBeLessThanOrEqual(1200);
     expect(updateParticles(parts, 10)).toHaveLength(0);
-  });
-  it('emits equal particle counts per simulated second', () => {
-    const counts = [30, 60, 120].map((hz) => {
-      const e = new ParticleEmitter(),
-        c = createCharacter(),
-        parts: Particle[] = [],
-        puffs: Puff[] = [];
-      c.mode = 'scripted-launch';
-      c.velocityY = -500;
-      for (let i = 0; i < hz; i++)
-        e.update(parts, puffs, c, ['#000'], 1 / hz, () => 0.5, false);
-      return parts.length;
-    });
-    expect(counts).toEqual([180, 180, 180]);
   });
   it('handles zero viewport and reduced motion', () => {
     const s = createScene();

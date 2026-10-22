@@ -57,25 +57,6 @@ export class ParticleEmitter {
       this.exhaust = 0;
       return;
     }
-    if (c.mode === 'scripted-launch' && c.velocityY < -150) {
-      this.petals += dt * 180;
-      while (this.petals >= 1) {
-        this.petals--;
-        parts.push({
-          k: 'petal',
-          x: c.x + (random() - 0.5) * 14,
-          y: c.y + 4,
-          vx: (random() - 0.5) * 40,
-          vy: 40 + random() * 80,
-          g: 15,
-          drag: 0.6,
-          life: 2.2 + random() * 1.5,
-          max: 3.7,
-          rot: random() * 6,
-          c: colors[Math.floor(random() * colors.length)],
-        });
-      }
-    } else this.petals = 0;
     if (c.mode === 'seated') {
       this.exhaust += dt * (Math.abs(c.velocityX) > 30 ? 20 : 5);
       while (this.exhaust >= 1) {

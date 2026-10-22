@@ -36,7 +36,7 @@ test('two touch points keep run and movement independent', async ({
   });
   await expect(move).toHaveAttribute('aria-pressed', 'false');
 });
-test('full journey reaches the island using real controls', async ({
+test('full journey crosses the river to the final beach using real controls', async ({
   page,
 }, info) => {
   test.skip(info.project.name !== 'desktop', 'Full route is covered once');
@@ -65,13 +65,12 @@ test('full journey reaches the island using real controls', async ({
   await page.waitForTimeout(750);
   await page.keyboard.down('Shift');
   await page.keyboard.down('d');
-  await expect(page.getByRole('button', { name: 'Island' })).toHaveAttribute(
-    'aria-current',
-    'location',
-    { timeout: 65000 },
-  );
+  // Swim across the river, then walk out onto the beach at the end.
+  const swimUp = page.getByRole('button', { name: 'swim up' });
+  await expect(swimUp).toBeVisible({ timeout: 40000 });
+  await expect(swimUp).toBeHidden({ timeout: 40000 });
   await page.keyboard.up('d');
   await page.keyboard.up('Shift');
-  await page.screenshot({ path: info.outputPath('island-finish.png') });
+  await page.screenshot({ path: info.outputPath('beach-finish.png') });
   expect(errors).toEqual([]);
 });
