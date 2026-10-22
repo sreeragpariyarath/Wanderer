@@ -1,9 +1,16 @@
 name: Deploy
 
+# Automatic deploys are OFF. The Pages project below (sreerag, served at
+# sreerag.pages.dev) now belongs to the portfolio repository, so a deploy from
+# this repository would overwrite the live portfolio. Running this workflow by
+# hand is still possible, but only with the confirmation phrase.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "overwrite-sreerag-pages-dev" to replace the live site with Wanderer'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -26,8 +33,8 @@ jobs:
   deploy:
     name: Deploy to Cloudflare Pages
     needs: ci
-    # Only ever publish main, including manual dispatches.
-    if: ${{ github.ref == 'refs/heads/main' }}
+    # Only ever publish main, and only when the confirmation phrase was typed.
+    if: ${{ github.ref == 'refs/heads/main' && inputs.confirm == 'overwrite-sreerag-pages-dev' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:

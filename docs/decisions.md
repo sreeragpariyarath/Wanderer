@@ -128,3 +128,12 @@ Status values: **Accepted**, **Temporary** (has a stated exit condition), **Pend
 - **Status:** Accepted. **Decided by:** Proposed.
 - **Decision:** `.gitattributes` sets `* text=auto eol=lf`.
 - **Why:** The repository was already stored with LF, but Windows checkouts convert to CRLF, which made `prettier --check` fail on files nobody had edited. CI runs on Linux and was unaffected, so this mainly stops local noise.
+
+## 18. Switch off automatic deploys from this repository
+
+- **Status:** Accepted. **Decided by:** Owner.
+- **Context:** The portfolio (`sreeragpariyarath/portfolio`) replaced Wanderer as the site at `sreerag.pages.dev`. Both repositories deploy to the same Pages project, `sreerag`.
+- **Decision:** Remove the push trigger from `deploy.yml` here. It can still be run manually, but only after typing a confirmation phrase, and still only from `main`.
+- **Why:** A merge or Dependabot PR in this repository would otherwise redeploy Wanderer over the live portfolio.
+- **Consequences:** Wanderer is not published anywhere right now. It can get its own Pages project later (for example a nested is-a.dev name). The Cloudflare token `sreerag-github-deploy` and this repository's `CLOUDFLARE_API_TOKEN` secret are no longer needed and should be removed.
+- **Supersedes:** the "deploy on every push to `main`" part of entry 3.
