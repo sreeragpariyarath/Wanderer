@@ -147,13 +147,14 @@ test('vehicle entry, fast exit restriction and checkpoint exit', async ({
 }) => {
   await start(page);
   await page.locator('canvas').click({ position: { x: 20, y: 20 } });
-  await page.keyboard.down('Shift');
+  // Walk, not run: the car is enterable within 90px, which a run crosses in
+  // about 0.4s. That is too short to notice and release the key reliably when
+  // frames are slow.
   await page.keyboard.down('d');
   await page
     .getByRole('button', { name: 'Get in the car' })
-    .waitFor({ state: 'visible', timeout: 10000 });
+    .waitFor({ state: 'visible', timeout: 15000 });
   await page.keyboard.up('d');
-  await page.keyboard.up('Shift');
   await page.getByRole('button', { name: 'Get in the car' }).click();
   await page.keyboard.down('d');
   await page.waitForTimeout(800);
