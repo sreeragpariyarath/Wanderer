@@ -3,6 +3,8 @@
 This document records how Wanderer is built, tested, hosted, and published, and what is still pending. It describes the setup as of 2026-10-19.
 The reasoning behind each choice is in [decisions.md](decisions.md).
 
+> **Status (2026-10-22):** automatic deploys from this repository are switched off. The Cloudflare Pages project `sreerag` (`sreerag.pages.dev`) now serves the portfolio from the `sreeragpariyarath/portfolio` repository, so a deploy from here would overwrite it. `deploy.yml` can still be run by hand, but only with a confirmation phrase. The sections below describe the pipeline as it was built for Wanderer; see [decisions.md](decisions.md) entry 18.
+
 ## At a glance
 
 | Item                 | Value                                                                           |
